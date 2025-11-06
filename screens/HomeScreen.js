@@ -53,12 +53,6 @@ export default function HomeScreen({ navigation }) {
       ),
     },
   ];
-
-  const handleContinue = () => {
-    setTimeout(() => {
-      navigation.navigate("AddUser");
-    }, 650);
-  };
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
       <View>
@@ -120,7 +114,13 @@ export default function HomeScreen({ navigation }) {
 
         <View style={styles.tabsContainer}>
           {menu.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.card}>
+            <TouchableOpacity key={index} style={styles.card}
+            onPress={() => {
+    if (item.title === "Order Booking") {
+      navigation.navigate("Order Booking");
+    }
+  }}
+            >
               <View style={styles.leftSection}>
                 <View style={styles.iconBox}>{item.icon}</View>
 
@@ -133,20 +133,6 @@ export default function HomeScreen({ navigation }) {
               </View>
             </TouchableOpacity>
           ))}
-        </View>
-
-         <View
-          style={{
-            alignItems: "center",
-            width: "80%",
-            paddingHorizontal: 20,
-            marginTop: 20,
-            marginLeft: 40,
-          }}
-        >
-          <TouchableOpacity style={styles.button} onPress={handleContinue}>
-            <Text style={styles.buttonText}>Submit Your Query</Text>
-          </TouchableOpacity>
         </View>
 
         <OtherReports />

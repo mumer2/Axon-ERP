@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { getUsers } from "../db";
+import { getUsers } from "../database/db";
 
 export default function UserListScreen() {
   const [users, setUsers] = useState([]);
@@ -35,12 +35,17 @@ export default function UserListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 10, textAlign: "center" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
   card: {
     backgroundColor: "#eee",
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
   },
-  text: { fontSize: 16 }
+  text: { fontSize: 16 },
 });

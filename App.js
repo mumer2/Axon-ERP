@@ -1,8 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useEffect ,useState} from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { initDB } from "./db";
+import { initDB } from "./database/db";
+import { CartProvider } from "./context/CartContext";
 
 // Screens
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -14,14 +15,16 @@ import QRScanScreen from "./screens/QRScanScreen";
 import HomeScreen from "./screens/HomeScreen";
 import AddUserScreen from "./screens/AddUserScreen";
 import UserListScreen from "./screens/UserListScreen";
-import FormScreen from "./screens/FormScreen";
-
+import OrderBookingScreen from "./screens/OrderBookingScreen";
+import ProductListScreen from "./screens/ProductListScreen";
+import CartScreen from "./screens/CartScreen";
+import AddItemScreen from "./screens/AddItemScreen";
+import AddCustomerScreen from "./screens/AddCustomerScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-
-    const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -38,64 +41,89 @@ export default function App() {
     );
   }
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen 
-          name="Welcome" 
-          component={WelcomeScreen} 
-          options={{ headerShown: false }} 
-        />
-         <Stack.Screen 
-          name="Onboard1" 
-          component={OnboardScreen1} 
-          options={{ headerShown: false }} 
-        />
-         <Stack.Screen 
-          name="Onboard2" 
-          component={OnboardScreen2} 
-          options={{ headerShown: false }} 
-        />
-         <Stack.Screen 
-          name="Onboard3" 
-          component={OnboardScreen3} 
-          options={{ headerShown: false }} 
-        />
-          <Stack.Screen 
-          name="Onboard4" 
-          component={OnboardScreen4} 
-          options={{ headerShown: false }} 
-        />
+    <CartProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Welcome"
+            component={WelcomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Onboard1"
+            component={OnboardScreen1}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Onboard2"
+            component={OnboardScreen2}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Onboard3"
+            component={OnboardScreen3}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Onboard4"
+            component={OnboardScreen4}
+            options={{ headerShown: false }}
+          />
 
-        <Stack.Screen 
-          name="QRScan" 
-          component={QRScanScreen} 
-          options={{ headerShown: false }} 
-        />
-         <Stack.Screen 
-          name="Home" 
-          component={HomeScreen} 
-          options={{ headerShown: false }} 
-        />
+          <Stack.Screen
+            name="QRScan"
+            component={QRScanScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
 
-         <Stack.Screen 
-          name="AddUser" 
-          component={AddUserScreen} 
-          options={{ headerShown: true }} 
-        />
+          <Stack.Screen
+            name="AddUser"
+            component={AddUserScreen}
+            options={{ headerShown: true }}
+          />
 
-         <Stack.Screen 
-          name="UserList" 
-          component={UserListScreen} 
-          options={{ headerShown: true }} 
-        />
+          <Stack.Screen
+            name="UserList"
+            component={UserListScreen}
+            options={{ headerShown: true }}
+          />
 
-         <Stack.Screen 
-          name="Form" 
-          component={FormScreen} 
-          options={{ headerShown: false }} 
-        />
+          <Stack.Screen
+            name="Order Booking"
+            component={OrderBookingScreen}
+            options={{ headerShown: true }}
+          />
 
-      </Stack.Navigator>
-    </NavigationContainer>
+          <Stack.Screen
+            name="Products"
+            component={ProductListScreen}
+            options={{ headerShown: true }}
+          />
+
+          <Stack.Screen
+            name="Cart"
+            component={CartScreen}
+            options={{ headerShown: true }}
+          />
+
+           <Stack.Screen
+            name="AddItem"
+            component={AddItemScreen}
+            options={{ headerShown: true }}
+          />
+
+           <Stack.Screen
+            name="AddCutomer"
+            component={AddCustomerScreen}
+            options={{ headerShown: true }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </CartProvider>
   );
 }
