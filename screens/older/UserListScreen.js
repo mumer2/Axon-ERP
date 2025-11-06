@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { getUsers } from "../database/db";
+import { getUsers } from "../../database/db";
 
 export default function UserListScreen() {
   const [users, setUsers] = useState([]);

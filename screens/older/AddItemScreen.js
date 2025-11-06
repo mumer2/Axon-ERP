@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { addItem, initDB } from "../database/db";
+import { addItem, initDB } from "../../database/db";
 
 export default function AddItemScreen({ navigation }) {
   const [form, setForm] = useState({

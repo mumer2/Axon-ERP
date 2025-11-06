@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { addUser } from "../database/db";
+import { addUser } from "../../database/db";
 
 export default function AddUserScreen({ navigation }) {
   const [name, setName] = useState("");

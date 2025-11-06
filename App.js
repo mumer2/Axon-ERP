@@ -13,13 +13,6 @@ import OnboardScreen3 from "./screens/OnboardScreen3";
 import OnboardScreen4 from "./screens/OnboardScreen4";
 import QRScanScreen from "./screens/QRScanScreen";
 import HomeScreen from "./screens/HomeScreen";
-import AddUserScreen from "./screens/AddUserScreen";
-import UserListScreen from "./screens/UserListScreen";
-import OrderBookingScreen from "./screens/OrderBookingScreen";
-import ProductListScreen from "./screens/ProductListScreen";
-import CartScreen from "./screens/CartScreen";
-import AddItemScreen from "./screens/AddItemScreen";
-import AddCustomerScreen from "./screens/AddCustomerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -81,47 +74,6 @@ export default function App() {
             options={{ headerShown: false }}
           />
 
-          <Stack.Screen
-            name="AddUser"
-            component={AddUserScreen}
-            options={{ headerShown: true }}
-          />
-
-          <Stack.Screen
-            name="UserList"
-            component={UserListScreen}
-            options={{ headerShown: true }}
-          />
-
-          <Stack.Screen
-            name="Order Booking"
-            component={OrderBookingScreen}
-            options={{ headerShown: true }}
-          />
-
-          <Stack.Screen
-            name="Products"
-            component={ProductListScreen}
-            options={{ headerShown: true }}
-          />
-
-          <Stack.Screen
-            name="Cart"
-            component={CartScreen}
-            options={{ headerShown: true }}
-          />
-
-           <Stack.Screen
-            name="AddItem"
-            component={AddItemScreen}
-            options={{ headerShown: true }}
-          />
-
-           <Stack.Screen
-            name="AddCutomer"
-            component={AddCustomerScreen}
-            options={{ headerShown: true }}
-          />
         </Stack.Navigator>
       </NavigationContainer>
     </CartProvider>

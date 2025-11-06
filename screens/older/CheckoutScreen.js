@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useCartStore } from "../store/useCartStore";
+import { useCartStore } from "../../store/useCartStore";
 
 export default function CheckoutScreen({ navigation }) {
   const { cart, removeFromCart, clearCart, totalPrice } = useCartStore();

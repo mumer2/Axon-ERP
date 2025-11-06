@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { useCustomerStore } from "../store/useCustomerStore";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import { useCustomerStore } from "../../store/useCustomerStore";
 
 export default function AddCustomerScreen({ navigation }) {
   const { setCustomer } = useCustomerStore();
@@ -73,7 +80,13 @@ export default function AddCustomerScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: "#F9FAFB" },
-  title: { fontSize: 24, fontWeight: "700", marginBottom: 20, textAlign: "center", color: "#111827" },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#111827",
+  },
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",

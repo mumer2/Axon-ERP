@@ -9,7 +9,7 @@ import {
   Image,
 } from "react-native";
 import { Trash2, CheckCircle, Plus, Minus } from "lucide-react-native";
-import { useCartStore } from "../store/useCartStore";
+import { useCartStore } from "../../store/useCartStore";
 
 export default function CartScreen() {
   const {
@@ -89,7 +89,8 @@ export default function CartScreen() {
         <Text style={styles.subtotalText}>
           Subtotal: Rs{" "}
           {(
-            (item.retailPrice - (item.discountAmount || 0)) * item.quantity
+            (item.retailPrice - (item.discountAmount || 0)) *
+            item.quantity
           ).toFixed(2)}
         </Text>
       </View>
@@ -138,7 +139,12 @@ export default function CartScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F9FAFB", padding: 16 },
-  header: { fontSize: 22, fontWeight: "700", color: "#111827", marginBottom: 12 },
+  header: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 12,
+  },
   cartItem: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -152,12 +158,31 @@ const styles = StyleSheet.create({
   itemDetails: { flex: 1 },
   itemName: { fontSize: 16, fontWeight: "700", color: "#1F2937" },
   detailText: { fontSize: 13, color: "#4B5563" },
-  quantityContainer: { flexDirection: "row", alignItems: "center", marginTop: 8 },
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
   qtyButton: { backgroundColor: "#2563EB", padding: 6, borderRadius: 6 },
-  quantityText: { marginHorizontal: 8, fontSize: 15, fontWeight: "600", color: "#111827" },
-  subtotalText: { fontSize: 14, fontWeight: "600", color: "#2563EB", marginTop: 6 },
+  quantityText: {
+    marginHorizontal: 8,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  subtotalText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2563EB",
+    marginTop: 6,
+  },
   deleteButton: { backgroundColor: "#EF4444", padding: 8, borderRadius: 8 },
-  emptyText: { textAlign: "center", fontSize: 16, color: "#6B7280", marginTop: 40 },
+  emptyText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#6B7280",
+    marginTop: 40,
+  },
   bottomContainer: {
     position: "absolute",
     bottom: 0,

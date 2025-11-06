@@ -8,8 +8,8 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { useCartStore } from "../store/useCartStore";
-import { getAllItems } from "../database/db"; // ✅ Correct import
+import { useCartStore } from "../../store/useCartStore";
+import { getAllItems } from "../../database/db"; // ✅ Correct import
 import { ShoppingCart } from "lucide-react-native";
 
 export default function ProductListScreen({ navigation }) {
@@ -167,7 +167,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: { width: 100, height: 100, borderRadius: 8, marginBottom: 6 },
-  name: { fontSize: 14, fontWeight: "700", textAlign: "center", marginBottom: 4 },
+  name: {
+    fontSize: 14,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 4,
+  },
   customer: { fontSize: 12, color: "#555" },
   code: { fontSize: 12, color: "#666" },
 
