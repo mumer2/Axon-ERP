@@ -17,24 +17,6 @@ export default function HomeScreen({ navigation }) {
 
   const menu = [
     {
-      title: "Payment Recovery",
-      icon: (
-        <Image
-          source={require("../assets/Icons/payment.png")}
-          style={styles.icon}
-        />
-      ),
-    },
-    {
-      title: "Live Tracking",
-      icon: (
-        <Image
-          source={require("../assets/Icons/LiveTraking.png")}
-          style={styles.icon}
-        />
-      ),
-    },
-    {
       title: "Order Booking",
       icon: (
         <Image
@@ -52,6 +34,25 @@ export default function HomeScreen({ navigation }) {
         />
       ),
     },
+    {
+      title: "Payment Recovery",
+      icon: (
+        <Image
+          source={require("../assets/Icons/payment.png")}
+          style={styles.icon}
+        />
+      ),
+    },
+    {
+      title: "Live Tracking",
+      icon: (
+        <Image
+          source={require("../assets/Icons/LiveTraking.png")}
+          style={styles.icon}
+        />
+      ),
+    },
+    
   ];
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -117,7 +118,7 @@ export default function HomeScreen({ navigation }) {
             <TouchableOpacity key={index} style={styles.card}
             onPress={() => {
     if (item.title === "Order Booking") {
-      navigation.navigate("Order Booking");
+      navigation.navigate("Customer");
     }
   }}
             >

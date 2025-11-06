@@ -2,8 +2,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
-import { initDB } from "./database/db";
+import { initDB } from "./databse/db";
 import { CartProvider } from "./context/CartContext";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Screens
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -13,6 +14,8 @@ import OnboardScreen3 from "./screens/OnboardScreen3";
 import OnboardScreen4 from "./screens/OnboardScreen4";
 import QRScanScreen from "./screens/QRScanScreen";
 import HomeScreen from "./screens/HomeScreen";
+import CustomerScreen from "./screens/CustomerScreen";
+import AddCustomerScreen from "./screens/AddCustomerScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +37,7 @@ export default function App() {
     );
   }
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <CartProvider>
       <NavigationContainer>
         <Stack.Navigator>
@@ -74,8 +78,21 @@ export default function App() {
             options={{ headerShown: false }}
           />
 
+           <Stack.Screen
+            name="Customer"
+            component={CustomerScreen}
+            options={{ headerShown: true }}
+          />
+
+           <Stack.Screen
+            name="AddCustomer"
+            component={AddCustomerScreen}
+            options={{ headerShown: true }}
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
     </CartProvider>
+    </GestureHandlerRootView>
   );
 }
