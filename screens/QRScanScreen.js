@@ -10,7 +10,6 @@ export default function QRScanScreen({ navigation }) {
       }, 650);
     };
 
-
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Scan QR Code</Text>

@@ -1,39 +1,43 @@
-import { View, Text, TouchableOpacity, StyleSheet, Image, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageBackground,
+} from "react-native";
 import { useEffect } from "react";
 export default function WelcomeScreen({ navigation }) {
-
-    useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       navigation.navigate("Onboard1");
-    }, 3000); // 3 seconds
+    }, 2000); // 2 seconds
 
     return () => clearTimeout(timer);
   }, []);
   return (
-     <ImageBackground
+    <ImageBackground
       source={require("../assets/WelcomeBg.png")}
       style={styles.bg}
       resizeMode="cover"
     >
       <View style={styles.overlay}></View>
 
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome back</Text>
 
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome back</Text>
-
-      <Image
-        source={require("../assets/Axon ERP.png")}
-        style={styles.logo}
-        resizeMode="contain"
-      />
-    
-    </View>
+        <Image
+          source={require("../assets/Axon ERP.png")}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-     bg: {
+  bg: {
     flex: 1,
     width: "100%",
     height: "100%",
@@ -59,9 +63,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-   logo: {
+  logo: {
     width: 213.22,
     height: 46.98,
-    marginBottom: 30
+    marginBottom: 30,
   },
 });

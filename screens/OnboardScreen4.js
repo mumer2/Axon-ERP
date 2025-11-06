@@ -13,7 +13,6 @@ import Dots from "../components/Dots";
 export default function OnboardScreen4({ navigation,route }) {
 
   // Animation values
-//   const circleAnim = useSharedValue(0);
 const startAnimation = route?.params?.animateCircle;
 const circleAnim = useSharedValue(startAnimation ? 1 : 0);
 
@@ -36,15 +35,6 @@ useEffect(() => {
     { rotate: `${interpolate(circleAnim.value, [0,1], [0, 90])}deg` }
   ]
 }));
-
-//   const circleStyle = useAnimatedStyle(() => {
-//     return {
-//       transform: [
-//         { translateY: interpolate(circleAnim.value, [0,1], [0, -200]) },
-//         { rotate: `${interpolate(circleAnim.value, [0,1], [0, 130])}deg` }
-//       ]
-//     };
-//   });
 
   // Stars Animation
   const starStyle = useAnimatedStyle(() => ({

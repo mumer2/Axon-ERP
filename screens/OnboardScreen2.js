@@ -36,15 +36,6 @@ export default function OnboardScreen2({ navigation, route }) {
   };
 });
 
-  // const circleStyle = useAnimatedStyle(() => {
-  //   return {
-  //     transform: [
-  //       { translateY: interpolate(circleAnim.value, [0,1], [0, -200]) },
-  //       { rotate: `${interpolate(circleAnim.value, [0,1], [0, 130])}deg` }
-  //     ]
-  //   };
-  // });
-
   // Stars Animation
   const starStyle = useAnimatedStyle(() => ({
     transform: [
@@ -138,7 +129,7 @@ const styles = StyleSheet.create({
   starRight:{ position:"absolute", top:320, right:-8, width:24, height:24, zIndex:50 },
   starBottom:{ position:"absolute", bottom:200, left:280, width:22, height:22, zIndex:50 },
 
-  // Your original styles
+  //styles
   bg:{ width:"100%", height:429.76 },
   bg2:{ flex:1, width:"100%", height:390.27, top:-40, justifyContent:"center", },
   content:{ flex:1, justifyContent:"center", gap:8, marginLeft:24, width:307.01, height:80 },

@@ -1,37 +1,52 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity,Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react-native";
 
 export default function OtherReports() {
   const reports = [
     {
       title: "Payments Received",
-      icon: <Image source={require("../assets/Icons/PaymentReceived.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/PaymentReceived.png")}
+          style={styles.icon}
+        />
+      ),
       amount: "$70.2M",
       change: "+500k",
       days: "in last 3 days",
       changeColor: "#1DBA4B",
-        daysColor: "gray",
+      daysColor: "gray",
       arrow: "up",
     },
     {
       title: "Orders Booked",
-      icon: <Image source={require("../assets/Icons/OrderBooked.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/OrderBooked.png")}
+          style={styles.icon}
+        />
+      ),
       amount: "$1.2M",
       change: "+20k",
       days: "in last 1 week",
       changeColor: "#1DBA4B",
-        daysColor: "gray",
+      daysColor: "gray",
       arrow: "up",
     },
     {
       title: "Outstanding Ledgers",
-      icon: <Image source={require("../assets/Icons/OutstandingLedgers.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/OutstandingLedgers.png")}
+          style={styles.icon}
+        />
+      ),
       amount: "$200.6k",
       change: "-500k",
       days: "in last 3 days",
       changeColor: "#FF3B30",
-        daysColor: "gray",
+      daysColor: "gray",
       arrow: "down",
     },
   ];
@@ -62,16 +77,24 @@ export default function OtherReports() {
             <View style={styles.right}>
               <Text style={styles.amount}>{item.amount}</Text>
               <View style={styles.changeRow}>
-                {item.arrow === "up" ? (
-                  <ArrowUpRight size={14} color={item.changeColor} />
-                ) : (
-                  <ArrowDownRight size={14} color={item.changeColor} />
-                )}
+               <View
+  style={[
+    styles.arrowBg,
+    { backgroundColor: item.arrow === "up" ? "#E9F8EE" : "#FFECEC" }
+  ]}
+>
+  {item.arrow === "up" ? (
+    <ArrowUpRight size={14} color={item.changeColor} />
+  ) : (
+    <ArrowDownRight size={14} color={item.changeColor} />
+  )}
+</View>
+
                 <Text style={[styles.changeText, { color: item.changeColor }]}>
                   {item.change}
                 </Text>
                 <Text style={[styles.changeText, { color: item.daysColor }]}>
-                 {item.days}
+                  {item.days}
                 </Text>
               </View>
             </View>
@@ -168,5 +191,14 @@ const styles = StyleSheet.create({
   },
 
   icon: { width: 26, height: 26, resizeMode: "contain" },
+
+  arrowBg: {
+  width: 22,
+  height: 22,
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 11,
+  marginRight: 4,
+}
 
 });

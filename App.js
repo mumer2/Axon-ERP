@@ -4,7 +4,7 @@ import { useEffect ,useState} from "react";
 import { ActivityIndicator, View } from "react-native";
 import { initDB } from "./db";
 
-
+// Screens
 import WelcomeScreen from "./screens/WelcomeScreen";
 import OnboardScreen1 from "./screens/OnboardScreen1";
 import OnboardScreen2 from "./screens/OnboardScreen2";
@@ -80,13 +80,13 @@ export default function App() {
          <Stack.Screen 
           name="AddUser" 
           component={AddUserScreen} 
-          options={{ headerShown: false }} 
+          options={{ headerShown: true }} 
         />
 
          <Stack.Screen 
           name="UserList" 
           component={UserListScreen} 
-          options={{ headerShown: false }} 
+          options={{ headerShown: true }} 
         />
 
          <Stack.Screen 

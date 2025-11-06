@@ -1,10 +1,15 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity,Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 
 export default function RecentActivitySection() {
   const data = [
     {
-      icon: <Image source={require("../assets/Icons/NewClient.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/NewClient.png")}
+          style={styles.icon}
+        />
+      ),
       bg: "#FFE7D3",
       title: "New Client Added",
       desc: "New client Skyline Solutions added by Ahmad Ali",
@@ -12,7 +17,12 @@ export default function RecentActivitySection() {
       day: "Wed",
     },
     {
-      icon: <Image source={require("../assets/Icons/InvoiceSent.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/InvoiceSent.png")}
+          style={styles.icon}
+        />
+      ),
       bg: "#D9F7E5",
       title: "Invoice sent",
       desc: "Invoice #240 sent to Digital Pro Agency",
@@ -20,7 +30,12 @@ export default function RecentActivitySection() {
       day: "Wed",
     },
     {
-      icon: <Image source={require("../assets/Icons/LeadStatus.png")} style={styles.icon} />,
+      icon: (
+        <Image
+          source={require("../assets/Icons/LeadStatus.png")}
+          style={styles.icon}
+        />
+      ),
       bg: "#FFD9DE",
       title: "Lead Status Updated",
       desc: "Lead Sana Traders moved to Negotiation Stage",
@@ -128,7 +143,7 @@ const styles = StyleSheet.create({
   },
 
   cardDesc: {
-    fontSize: 12,
+    fontSize: 10,
     color: "#666",
     marginTop: 2,
   },
@@ -150,5 +165,4 @@ const styles = StyleSheet.create({
   },
 
   icon: { width: 26, height: 26, resizeMode: "contain" },
-
 });
