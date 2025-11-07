@@ -20,13 +20,19 @@
         "foregroundImage": "./assets/Logo/Logo.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.m_umer_m.axonerp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-sqlite"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2540b639-2fb6-4b8c-8431-3e0a09a99bfc"
+      }
+    }
   }
 }

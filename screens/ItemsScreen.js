@@ -155,7 +155,7 @@ const handleRemoveItem = (itemId) => {
       />
       <View style={styles.itemInfo}>
         <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemPrice}>${item.price}</Text>
+        <Text style={styles.itemPrice}>Rs.{item.price}</Text>
       </View>
       <View style={styles.rightContainer}>
         <TextInput
@@ -193,7 +193,7 @@ const handleRemoveItem = (itemId) => {
     </View>
 
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-      <Text style={styles.orderText}>${item.total.toFixed(2)}</Text>
+      <Text style={styles.orderText}>Rs.{item.total.toFixed(2)}</Text>
 
       {/* ❌ Delete icon */}
       <TouchableOpacity onPress={() => handleRemoveItem(item.id)}>
@@ -243,7 +243,7 @@ const handleRemoveItem = (itemId) => {
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Grand Total:</Text>
             <Text style={styles.totalPrice}>
-              ${orderList.reduce((sum, item) => sum + item.total, 0).toFixed(2)}
+              Rs.{orderList.reduce((sum, item) => sum + item.total, 0).toFixed(2)}
             </Text>
           </View>
         </View>

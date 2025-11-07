@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { getAllOrders } from "../database"; // ✅ make sure path matches your project
+import { getAllOrders } from "../database";
 import { useNavigation } from "@react-navigation/native";
 
 export default function OrdersScreen() {

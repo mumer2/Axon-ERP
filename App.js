@@ -17,7 +17,6 @@ import HomeScreen from "./screens/HomeScreen";
 import CustomerScreen from "./screens/CustomerScreen";
 import AddCustomerScreen from "./screens/AddCustomerScreen";
 import ItemsScreen from "./screens/ItemsScreen";
-import { getAllOrders } from "./database";
 import OrdersScreen from "./screens/OrdersScreen";
 import OrderDetailsScreen from "./screens/OrderDetailsScreen";
 

@@ -1,11 +1,9 @@
 import * as SQLite from "expo-sqlite";
 
-// Open or create database
 const db = SQLite.openDatabaseSync("customer0DB.db");
 
-// ---------------------- INIT DATABASE ----------------------
 export const initDB = async () => {
-  // ✅ Create Customer Table
+  // Customer Table
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS customer (
       entity_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +14,7 @@ export const initDB = async () => {
     );
   `);
 
-  // ✅ Create Items Table
+  // Items Table
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +24,7 @@ export const initDB = async () => {
     );
   `);
 
-  // ✅ Create Order Booking (Header Table)
+  // Order Booking 
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS order_booking (
       booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +37,7 @@ export const initDB = async () => {
     );
   `);
 
-  // ✅ Create Order Booking Line (Details Table)
+  // Order Booking Line (Details Table)
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS order_booking_line (
       line_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +51,7 @@ export const initDB = async () => {
     );
   `);
 
-  // ✅ Insert dummy customers if empty
+  // Insert dummy customers if empty
   const existingCustomers = await db.getAllAsync(
     "SELECT COUNT(*) as count FROM customer"
   );
@@ -68,7 +66,7 @@ export const initDB = async () => {
     `);
   }
 
-  // ✅ Insert dummy items if empty
+  // Insert dummy items if empty
   const existingItems = await db.getAllAsync("SELECT COUNT(*) as count FROM items");
   if (existingItems?.[0]?.count === 0) {
     await db.runAsync(`
@@ -79,6 +77,41 @@ export const initDB = async () => {
       ('Item D', 60, '')
     `);
   }
+
+  // Insert dummy items if empty
+// const existingItems = await db.getAllAsync(
+//   "SELECT COUNT(*) as count FROM items"
+// );
+
+// if (existingItems?.[0]?.count > 0) {
+//   console.log("Clearing old items...");
+//   await db.execAsync("DELETE FROM items");
+// }
+
+// console.log("Inserting dummy items...");
+// await db.execAsync(`
+//   INSERT INTO items (name, price, image) VALUES
+//     ('Shampoo', 150, ''),
+//     ('Soap', 60, ''),
+//     ('Toothpaste', 120, ''),
+//     ('Detergent', 250, ''),
+//     ('Face Wash', 180, ''),
+//     ('Hair Oil', 220, ''),
+//     ('Hand Wash', 140, ''),
+//     ('Perfume', 450, ''),
+//     ('Shaving Cream', 160, ''),
+//     ('Body Lotion', 300, ''),
+//     ('Towel', 500, ''),
+//     ('Toothbrush', 80, ''),
+//     ('Body Spray', 350, ''),
+//     ('Conditioner', 210, ''),
+//     ('Lip Balm', 90, ''),
+//     ('Deodorant', 270, '');
+// `);
+// console.log("Dummy items reinserted!");
+
+
+
 };
 
 // ---------------------- CUSTOMER FUNCTIONS ----------------------
@@ -123,9 +156,10 @@ export const addItem = async (name, price, image = "") => {
   ]);
 };
 
+
 // ---------------------- ORDER BOOKING FUNCTIONS ----------------------
 
-// ✅ Add main order (returns booking_id)
+// Add main order (returns booking_id)
 export const addOrderBooking = async (order) => {
   const result = await db.runAsync(
     `INSERT INTO order_booking (order_date, customer_id, order_no, created_by_id, created_date)
@@ -144,7 +178,7 @@ export const addOrderBookingLine = async (line) => {
 };
 
 
-// ✅ Fetch all orders summary
+// Fetch all orders summary
 export const getAllOrders = async () => {
   return await db.getAllAsync(`
     SELECT 
@@ -162,7 +196,7 @@ export const getAllOrders = async () => {
   `);
 };
 
-// ✅ Fetch single order details
+// Fetch single order details
 export const getOrderDetails = async (bookingId) => {
   return await db.getAllAsync(
     `
