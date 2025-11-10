@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { initDB, getAllCustomers, searchCustomers, updateVisited } from "../database";
 import { Feather } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const getAvatarColor = (name) => {
   const colors = ["#FFB6C1", "#87CEFA", "#90EE90", "#FFA07A", "#DDA0DD"];
@@ -96,6 +97,7 @@ export default function CustomerScreen({ navigation }) {
   );
 
   return (
+    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
     <View style={styles.container}>
       {/* Search Bar with Add Button */}
       <View style={styles.searchRow}>
@@ -109,12 +111,12 @@ export default function CustomerScreen({ navigation }) {
           <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
         </View>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate("AddCustomer")}
         >
           <Feather name="plus" size={28} color="blue" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Customer List */}
@@ -125,6 +127,7 @@ export default function CustomerScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       />
     </View>
+    </SafeAreaView>
   );
 }
 

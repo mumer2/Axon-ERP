@@ -1,7 +1,9 @@
 import * as SQLite from "expo-sqlite";
 
+// Use openDatabaseSync for modern Expo SDK (persistent DB)
 const db = SQLite.openDatabaseSync("customer0DB.db");
 
+// ---------------------- INITIALIZATION ----------------------
 export const initDB = async () => {
   // Customer Table
   await db.execAsync(`
@@ -24,7 +26,7 @@ export const initDB = async () => {
     );
   `);
 
-  // Order Booking 
+  // Order Booking
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS order_booking (
       booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +69,9 @@ export const initDB = async () => {
   }
 
   // Insert dummy items if empty
-  const existingItems = await db.getAllAsync("SELECT COUNT(*) as count FROM items");
+  const existingItems = await db.getAllAsync(
+    "SELECT COUNT(*) as count FROM items"
+  );
   if (existingItems?.[0]?.count === 0) {
     await db.runAsync(`
       INSERT INTO items (name, price, image) VALUES
@@ -77,41 +81,6 @@ export const initDB = async () => {
       ('Item D', 60, '')
     `);
   }
-
-  // Insert dummy items if empty
-// const existingItems = await db.getAllAsync(
-//   "SELECT COUNT(*) as count FROM items"
-// );
-
-// if (existingItems?.[0]?.count > 0) {
-//   console.log("Clearing old items...");
-//   await db.execAsync("DELETE FROM items");
-// }
-
-// console.log("Inserting dummy items...");
-// await db.execAsync(`
-//   INSERT INTO items (name, price, image) VALUES
-//     ('Shampoo', 150, ''),
-//     ('Soap', 60, ''),
-//     ('Toothpaste', 120, ''),
-//     ('Detergent', 250, ''),
-//     ('Face Wash', 180, ''),
-//     ('Hair Oil', 220, ''),
-//     ('Hand Wash', 140, ''),
-//     ('Perfume', 450, ''),
-//     ('Shaving Cream', 160, ''),
-//     ('Body Lotion', 300, ''),
-//     ('Towel', 500, ''),
-//     ('Toothbrush', 80, ''),
-//     ('Body Spray', 350, ''),
-//     ('Conditioner', 210, ''),
-//     ('Lip Balm', 90, ''),
-//     ('Deodorant', 270, '');
-// `);
-// console.log("Dummy items reinserted!");
-
-
-
 };
 
 // ---------------------- CUSTOMER FUNCTIONS ----------------------
@@ -156,7 +125,6 @@ export const addItem = async (name, price, image = "") => {
   ]);
 };
 
-
 // ---------------------- ORDER BOOKING FUNCTIONS ----------------------
 
 // Add main order (returns booking_id)
@@ -164,19 +132,39 @@ export const addOrderBooking = async (order) => {
   const result = await db.runAsync(
     `INSERT INTO order_booking (order_date, customer_id, order_no, created_by_id, created_date)
      VALUES (?, ?, ?, ?, ?)`,
-    [order.order_date, order.customer_id, order.order_no, order.created_by_id, order.created_date]
+    [
+      order.order_date,
+      order.customer_id,
+      order.order_no,
+      order.created_by_id,
+      order.created_date,
+    ]
   );
   return result.lastInsertRowId;
 };
 
+// Add order booking line — fixed to ensure data is committed
 export const addOrderBookingLine = async (line) => {
-  await db.runAsync(
-    `INSERT INTO order_booking_line (booking_id, item_id, order_qty, unit_price, amount)
-     VALUES (?, ?, ?, ?, ?)`,
-    [line.booking_id, line.item_id, line.order_qty, line.unit_price, line.amount]
-  );
+  await db.execAsync("BEGIN TRANSACTION;");
+  try {
+    await db.runAsync(
+      `INSERT INTO order_booking_line (booking_id, item_id, order_qty, unit_price, amount)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        line.booking_id,
+        line.item_id,
+        line.order_qty,
+        line.unit_price,
+        line.amount,
+      ]
+    );
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    console.error("Error inserting order line:", error);
+    await db.execAsync("ROLLBACK;");
+    throw error;
+  }
 };
-
 
 // Fetch all orders summary
 export const getAllOrders = async () => {
@@ -200,7 +188,12 @@ export const getAllOrders = async () => {
 export const getOrderDetails = async (bookingId) => {
   return await db.getAllAsync(
     `
-    SELECT obl.line_id, i.name AS item_name, obl.order_qty, obl.unit_price, obl.amount
+    SELECT 
+      obl.line_id, 
+      i.name AS item_name, 
+      obl.order_qty, 
+      obl.unit_price, 
+      obl.amount
     FROM order_booking_line obl
     JOIN items i ON obl.item_id = i.id
     WHERE obl.booking_id = ?
@@ -208,6 +201,94 @@ export const getOrderDetails = async (bookingId) => {
     [bookingId]
   );
 };
+
+
+// ---------------------- ORDER BOOKING LINE HELPERS ----------------------
+
+// Get existing order line by booking and item
+export const getOrderLineByBookingAndItem = async (bookingId, itemId) => {
+  return await db.getAllAsync(
+    `SELECT * FROM order_booking_line WHERE booking_id = ? AND item_id = ?`,
+    [bookingId, itemId]
+  );
+};
+
+// Update an existing order line
+export const updateOrderBookingLine = async (lineId, data) => {
+  await db.runAsync(
+    `UPDATE order_booking_line 
+     SET order_qty = ?, amount = ?
+     WHERE line_id = ?`,
+    [data.order_qty, data.amount, lineId]
+  );
+};
+
+
+// ---------------------- DELETE ORDER LINE ----------------------
+export const deleteOrderBookingLine = async (booking_line_id) => {
+  await db.runAsync(
+    "DELETE FROM order_booking_line WHERE line_id = ?",
+    [booking_line_id]
+  );
+};
+
+
+// Update order booking line
+export const updateOrderBookingLineDetails = async ({ booking_line_id, order_qty, amount }) => {
+  try {
+    await db.runAsync(
+      `UPDATE order_booking_line 
+       SET order_qty = ?, amount = ? 
+       WHERE line_id = ?`,
+      [order_qty, amount, booking_line_id]
+    );
+  } catch (error) {
+    console.error("Failed to update order line:", error);
+    throw error;
+  }
+};
+
+
+// ---------------------- RECENT ACTIVITY ----------------------
+
+export const initRecentActivityTable = async () => {
+  try {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS recent_activity (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        booking_id INTEGER,
+        customer_name TEXT,
+        item_count INTEGER,
+        total_amount REAL,
+        activity_date TEXT
+      )
+    `);
+    console.log("Recent activity table initialized.");
+  } catch (error) {
+    console.error("Error creating recent_activity table:", error);
+  }
+};
+
+
+
+export const addRecentActivity = async ({ booking_id, customer_name, item_count, total_amount }) => {
+  const date = new Date().toISOString();
+  await db.runAsync(
+    `INSERT INTO recent_activity (booking_id, customer_name, item_count, total_amount, activity_date)
+     VALUES (?, ?, ?, ?, ?)`,
+    [booking_id, customer_name, item_count, total_amount, date]
+  );
+};
+
+
+// Get all recent activities (latest first)
+export const getRecentActivities = async () => {
+  return await db.getAllAsync(`
+    SELECT * FROM recent_activity
+    ORDER BY id ASC
+  `);
+};
+
 
 
 
