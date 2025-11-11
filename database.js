@@ -60,11 +60,26 @@ export const initDB = async () => {
   if (existingCustomers?.[0]?.count === 0) {
     await db.runAsync(`
       INSERT INTO customer (name, phone, last_seen, visited) VALUES
-      ('John Doe', '123456789', '2025-11-06 10:00', 1),
-      ('Jane Smith', '987654321', '2025-11-05 18:30', 0),
-      ('Alice Johnson', '555666777', '2025-11-06 09:15', 1),
-      ('Bob Williams', '111222333', '2025-11-04 14:20', 0),
-      ('Carol Brown', '444555666', '2025-11-06 08:45', 1)
+  ('John Doe', '123456789', '2025-11-06 10:00', 1),
+  ('Jane Smith', '987654321', '2025-11-05 18:30', 0),
+  ('Alice Johnson', '555666777', '2025-11-06 09:15', 1),
+  ('Bob Williams', '111222333', '2025-11-04 14:20', 0),
+  ('Carol Brown', '444555666', '2025-11-06 08:45', 1),
+  ('David Miller', '777888999', '2025-11-03 19:10', 0),
+  ('Eva Davis', '222333444', '2025-11-06 11:30', 1),
+  ('Frank Wilson', '333444555', '2025-11-05 16:50', 0),
+  ('Grace Lee', '666777888', '2025-11-06 07:25', 1),
+  ('Henry Taylor', '999000111', '2025-11-04 12:40', 0),
+  ('Ivy Anderson', '555444333', '2025-11-06 09:50', 1),
+  ('Jack Thomas', '111333555', '2025-11-05 20:05', 0),
+  ('Karen Martin', '444666888', '2025-11-06 10:15', 1),
+  ('Leo Harris', '777999111', '2025-11-03 15:30', 0),
+  ('Mia Clark', '222555777', '2025-11-06 08:05', 1),
+  ('Noah Lewis', '333666999', '2025-11-05 17:25', 0),
+  ('Olivia Robinson', '666111444', '2025-11-06 07:55', 1),
+  ('Peter Walker', '999222555', '2025-11-04 11:10', 0),
+  ('Quinn Hall', '555777222', '2025-11-06 09:40', 1),
+  ('Rachel Young', '111444777', '2025-11-05 18:00', 0)
     `);
   }
 
@@ -73,13 +88,48 @@ export const initDB = async () => {
     "SELECT COUNT(*) as count FROM items"
   );
   if (existingItems?.[0]?.count === 0) {
-    await db.runAsync(`
-      INSERT INTO items (name, price, image) VALUES
-      ('Item A', 100, ''),
-      ('Item B', 200, ''),
-      ('Item C', 50, ''),
-      ('Item D', 60, '')
-    `);
+   await db.runAsync(`
+  INSERT INTO items (name, price, image) VALUES
+  -- 🧵 Clothing & Textiles
+  ('Cotton Fabric Roll', 1200, ''),
+  ('Polyester Yarn', 850, ''),
+  ('Silk Dupatta', 500, ''),
+  ('Denim Jeans', 2200, ''),
+  ('Formal Shirt', 2100, ''),
+  ('T-Shirt Pack', 1500, ''),
+  ('Winter Jacket', 4500, ''),
+
+  -- 🛒 Groceries
+  ('Basmati Rice 5kg', 1700, ''),
+  ('Cooking Oil 1L', 620, ''),
+  ('Sugar 1kg', 180, ''),
+  ('Wheat Flour 10kg', 1650, ''),
+  ('Tea Pack 250g', 450, ''),
+  ('Milk Carton 1L', 270, ''),
+  ('Eggs (Dozen)', 320, ''),
+
+  -- 🧴 Household & Cleaning
+  ('Washing Powder 1kg', 480, ''),
+  ('Dishwashing Liquid 500ml', 350, ''),
+  ('Bath Soap 3-Pack', 250, ''),
+  ('Shampoo 400ml', 600, ''),
+  ('Toothpaste 150g', 200, ''),
+
+  -- 💻 Electronics
+  ('LED Bulb 12W', 350, ''),
+  ('Power Bank 10000mAh', 2800, ''),
+  ('Bluetooth Earbuds', 4200, ''),
+  ('USB Cable Type-C', 350, ''),
+  ('Mobile Charger', 950, ''),
+
+  -- 🏠 Home & Kitchen
+  ('Plastic Chair', 1200, ''),
+  ('Stainless Steel Pan', 2100, ''),
+  ('Curtain Set', 2500, ''),
+  ('Wall Clock', 1450, ''),
+  ('Floor Mat', 850, '')
+`);
+
   }
 };
 
@@ -202,7 +252,6 @@ export const getOrderDetails = async (bookingId) => {
   );
 };
 
-
 // ---------------------- ORDER BOOKING LINE HELPERS ----------------------
 
 // Get existing order line by booking and item
@@ -223,18 +272,19 @@ export const updateOrderBookingLine = async (lineId, data) => {
   );
 };
 
-
 // ---------------------- DELETE ORDER LINE ----------------------
 export const deleteOrderBookingLine = async (booking_line_id) => {
-  await db.runAsync(
-    "DELETE FROM order_booking_line WHERE line_id = ?",
-    [booking_line_id]
-  );
+  await db.runAsync("DELETE FROM order_booking_line WHERE line_id = ?", [
+    booking_line_id,
+  ]);
 };
 
-
 // Update order booking line
-export const updateOrderBookingLineDetails = async ({ booking_line_id, order_qty, amount }) => {
+export const updateOrderBookingLineDetails = async ({
+  booking_line_id,
+  order_qty,
+  amount,
+}) => {
   try {
     await db.runAsync(
       `UPDATE order_booking_line 
@@ -247,7 +297,6 @@ export const updateOrderBookingLineDetails = async ({ booking_line_id, order_qty
     throw error;
   }
 };
-
 
 // ---------------------- RECENT ACTIVITY ----------------------
 
@@ -269,9 +318,12 @@ export const initRecentActivityTable = async () => {
   }
 };
 
-
-
-export const addRecentActivity = async ({ booking_id, customer_name, item_count, total_amount }) => {
+export const addRecentActivity = async ({
+  booking_id,
+  customer_name,
+  item_count,
+  total_amount,
+}) => {
   const date = new Date().toISOString();
   await db.runAsync(
     `INSERT INTO recent_activity (booking_id, customer_name, item_count, total_amount, activity_date)
@@ -280,7 +332,6 @@ export const addRecentActivity = async ({ booking_id, customer_name, item_count,
   );
 };
 
-
 // Get all recent activities (latest first)
 export const getRecentActivities = async () => {
   return await db.getAllAsync(`
@@ -288,13 +339,6 @@ export const getRecentActivities = async () => {
     ORDER BY id ASC
   `);
 };
-
-
-
-
-
-
-
 
 // import * as SQLite from "expo-sqlite";
 
@@ -370,4 +414,3 @@ export const getRecentActivities = async () => {
 //     [name, phone, last_seen, visited]
 //   );
 // };
-

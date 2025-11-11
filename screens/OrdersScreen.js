@@ -5,10 +5,12 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Platform,
   ActivityIndicator,
 } from "react-native";
 import { getAllOrders } from "../database";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -49,6 +51,7 @@ export default function OrdersScreen() {
   }
 
   return (
+        <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
     <View style={styles.container}>
       <FlatList
         data={orders}
@@ -73,10 +76,12 @@ export default function OrdersScreen() {
         )}
       />
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: "#f9fafb", paddingBottom: Platform.OS === "android" ? 20 : 0 },
   container: {
     flex: 1,
     backgroundColor: "#f7f8fa",

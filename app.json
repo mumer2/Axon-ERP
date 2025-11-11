@@ -20,6 +20,15 @@
         "foregroundImage": "./assets/Logo/Logo.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCHaKIh21TWt6joSNoCLL4Z6e8UYxoBZLU"
+        }
+      },
       "edgeToEdgeEnabled": true,
       "package": "com.m_umer_m.axonerp"
     },
@@ -27,7 +36,13 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite"
+      "expo-sqlite",
+       [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow the app to use your location for live tracking."
+        }
+      ]
     ],
     "extra": {
       "eas": {

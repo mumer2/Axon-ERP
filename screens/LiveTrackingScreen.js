@@ -10,6 +10,7 @@ import {
   Image,
   Dimensions,
   Platform,
+  Alert,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
@@ -20,7 +21,6 @@ const { width, height } = Dimensions.get("window");
 export default function LiveTrackingScreen() {
   const mapRef = useRef(null);
 
-  // 📍 Example customers (Faisalabad)
   const customerList = [
     { id: 1, name: "Chakra Fabrics", latitude: 31.418, longitude: 73.079 },
     { id: 2, name: "Madina Cloth House", latitude: 31.425, longitude: 73.095 },
@@ -35,37 +35,69 @@ export default function LiveTrackingScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState(customerList);
 
-  // 🧭 Get user's location
+  const [locationSubscription, setLocationSubscription] = useState(null);
+
+  // -----------------------
+  // 🔒 Request location safely
+  // -----------------------
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access location was denied");
-        return;
-      }
+    let subscription;
 
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-      });
-      setCurrentLocation({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
-
-      // Watch live movement
-      Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, distanceInterval: 10 },
-        (loc) => {
-          setCurrentLocation({
-            latitude: loc.coords.latitude,
-            longitude: loc.coords.longitude,
-          });
+    const initLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "App requires location permission to work properly."
+          );
+          return;
         }
-      );
-    })();
+
+        const initialLoc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        if (!initialLoc?.coords) return;
+
+        setCurrentLocation({
+          latitude: initialLoc.coords.latitude,
+          longitude: initialLoc.coords.longitude,
+        });
+
+        // Watch location
+        subscription = await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.High, distanceInterval: 10 },
+          (loc) => {
+            if (loc?.coords) {
+              setCurrentLocation({
+                latitude: loc.coords.latitude,
+                longitude: loc.coords.longitude,
+              });
+            }
+          }
+        );
+
+        setLocationSubscription(subscription);
+      } catch (err) {
+        console.log("Location error:", err);
+        Alert.alert(
+          "Error",
+          "Failed to get location. Please restart the app."
+        );
+      }
+    };
+
+    initLocation();
+
+    return () => {
+      if (subscription) subscription.remove();
+    };
   }, []);
 
-  // 🔍 Filter customers
+  // -----------------------
+  // 🔍 Search customers
+  // -----------------------
   const handleSearch = (text) => {
     setSearchQuery(text);
     if (text.trim() === "") {
@@ -78,27 +110,47 @@ export default function LiveTrackingScreen() {
     }
   };
 
-  // 🎯 Track distance
+  // -----------------------
+  // 🎯 Track distance and zoom map
+  // -----------------------
   const handleTrack = () => {
     Keyboard.dismiss();
     if (!selectedCustomer) {
-      alert("Please select a customer to track");
+      Alert.alert("Select Customer", "Please select a customer to track.");
       return;
     }
-    if (!currentLocation) return;
 
-    const dist = haversine(currentLocation, selectedCustomer, { unit: "km" }).toFixed(2);
-    setDistance(dist);
+    if (!currentLocation) {
+      Alert.alert(
+        "Location not available",
+        "Waiting for GPS signal. Try again in a moment."
+      );
+      return;
+    }
 
-    mapRef.current.fitToCoordinates([currentLocation, selectedCustomer], {
-      edgePadding: { top: 100, right: 100, bottom: 100, left: 100 },
-      animated: true,
-    });
+    try {
+      const dist = haversine(currentLocation, selectedCustomer, {
+        unit: "km",
+      }).toFixed(2);
+      setDistance(dist);
+
+      if (mapRef.current) {
+        mapRef.current.fitToCoordinates([currentLocation, selectedCustomer], {
+          edgePadding: { top: 120, right: 120, bottom: 120, left: 120 },
+          animated: true,
+        });
+      }
+    } catch (error) {
+      console.log("Haversine error:", error);
+    }
   };
 
+  // -----------------------
+  // 🔹 Render
+  // -----------------------
   return (
     <View style={styles.container}>
-      {/* 🔍 Search and Track Bar */}
+      {/* Search Bar */}
       <View style={styles.topBar}>
         <View style={styles.searchSection}>
           <TextInput
@@ -114,7 +166,7 @@ export default function LiveTrackingScreen() {
         </View>
       </View>
 
-      {/* 📋 Search Results */}
+      {/* Customer list */}
       {searchQuery.length > 0 && (
         <FlatList
           data={filteredCustomers}
@@ -126,12 +178,14 @@ export default function LiveTrackingScreen() {
                 setSelectedCustomer(item);
                 setSearchQuery("");
                 Keyboard.dismiss();
-                mapRef.current.animateToRegion({
-                  latitude: item.latitude,
-                  longitude: item.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
-                });
+                if (mapRef.current) {
+                  mapRef.current.animateToRegion({
+                    latitude: item.latitude,
+                    longitude: item.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  });
+                }
               }}
             >
               <Text style={styles.customerName}>{item.name}</Text>
@@ -141,19 +195,28 @@ export default function LiveTrackingScreen() {
         />
       )}
 
-      {/* 🗺️ Map */}
+      {/* Map */}
       {currentLocation ? (
         <MapView
           ref={mapRef}
           style={styles.map}
-          showsUserLocation={true}
+          showsUserLocation={!!currentLocation}
           showsMyLocationButton={true}
-          initialRegion={{
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
+          initialRegion={
+            currentLocation
+              ? {
+                  latitude: currentLocation.latitude,
+                  longitude: currentLocation.longitude,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }
+              : {
+                  latitude: 31.418,
+                  longitude: 73.079,
+                  latitudeDelta: 0.05,
+                  longitudeDelta: 0.05,
+                }
+          }
         >
           {customerList.map((cust) => (
             <Marker
@@ -170,8 +233,7 @@ export default function LiveTrackingScreen() {
             </Marker>
           ))}
 
-          {/* 🔵 Draw route */}
-          {selectedCustomer && (
+          {selectedCustomer && currentLocation && (
             <Polyline
               coordinates={[currentLocation, selectedCustomer]}
               strokeColor="#007bff"
@@ -185,7 +247,7 @@ export default function LiveTrackingScreen() {
         </View>
       )}
 
-      {/* 📏 Distance Info */}
+      {/* Distance info */}
       {distance && selectedCustomer && (
         <View style={styles.infoBox}>
           <Text style={styles.infoTitle}>Tracking Customer</Text>
@@ -199,7 +261,6 @@ export default function LiveTrackingScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9" },
-
   topBar: {
     position: "absolute",
     top: Platform.OS === "ios" ? 50 : 30,
@@ -220,80 +281,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#f3f3f3",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    height: 40,
-    color: "#333",
-  },
-  trackButton: {
-    marginLeft: 8,
-    backgroundColor: "#007bff",
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 8,
-  },
+  searchInput: { flex: 1, backgroundColor: "#f3f3f3", borderRadius: 8, paddingHorizontal: 12, height: 40, color: "#333" },
+  trackButton: { marginLeft: 8, backgroundColor: "#007bff", paddingHorizontal: 16, paddingVertical: 9, borderRadius: 8 },
   trackText: { color: "#fff", fontWeight: "bold" },
-
-  customerList: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 100 : 80,
-    left: 15,
-    right: 15,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    maxHeight: height * 0.25,
-    zIndex: 30,
-  },
-  customerItem: {
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
+  customerList: { position: "absolute", top: Platform.OS === "ios" ? 100 : 80, left: 15, right: 15, backgroundColor: "#fff", borderRadius: 10, elevation: 4, shadowColor: "#000", shadowOpacity: 0.1, shadowOffset: { width: 0, height: 2 }, shadowRadius: 4, maxHeight: height * 0.25, zIndex: 30 },
+  customerItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: "#eee" },
   customerName: { fontSize: 16, color: "#333" },
-
-  map: {
-    flex: 1,
-  },
-
-  infoBox: {
-    position: "absolute",
-    bottom: 30,
-    left: 20,
-    right: 20,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-    elevation: 6,
-  },
-  infoTitle: {
-    fontSize: 14,
-    color: "#888",
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-  },
-  infoDistance: {
-    fontSize: 15,
-    color: "#007bff",
-    marginTop: 3,
-  },
-
+  map: { flex: 1 },
+  infoBox: { position: "absolute", bottom: 30, left: 20, right: 20, backgroundColor: "#fff", borderRadius: 12, padding: 14, alignItems: "center", shadowColor: "#000", shadowOpacity: 0.15, shadowOffset: { width: 0, height: 3 }, shadowRadius: 6, elevation: 6 },
+  infoTitle: { fontSize: 14, color: "#888", marginBottom: 4 },
+  infoText: { fontSize: 16, fontWeight: "600", color: "#333" },
+  infoDistance: { fontSize: 15, color: "#007bff", marginTop: 3 },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, color: "#333" },
 });

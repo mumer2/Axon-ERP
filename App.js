@@ -87,8 +87,8 @@ export default function App() {
             <Stack.Screen name="Order Details" component={OrderDetailsScreen} options={{ headerShown: true }} />
             <Stack.Screen name="Order List" component={OrderListScreen} options={{ headerShown: true }} />
             <Stack.Screen name="QRScan" component={QRScanScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="AllRecentActivities" component={AllRecentActivities} options={{ headerShown: true }} />
-            <Stack.Screen name="Live Traking" component={LiveTrackingScreen} options={{ headerShown: true }} />
+            <Stack.Screen name="Recent Activities" component={AllRecentActivities} options={{ headerShown: true }} />
+            <Stack.Screen name="Live Tracking" component={LiveTrackingScreen} options={{ headerShown: true }} />
 
           </Stack.Navigator>
         </NavigationContainer>
