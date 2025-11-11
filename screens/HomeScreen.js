@@ -120,6 +120,9 @@ export default function HomeScreen({ navigation }) {
     if (item.title === "Order Booking") {
       navigation.navigate("Customer");
     }
+    else if (item.title === "Live Tracking") {
+      navigation.navigate("Live Traking")
+    }
   }}
             >
               <View style={styles.leftSection}>

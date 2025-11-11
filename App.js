@@ -22,6 +22,7 @@ import OrdersScreen from "./screens/OrdersScreen";
 import OrderDetailsScreen from "./screens/OrderDetailsScreen";
 import OrderListScreen from "./screens/OrderListScreen";
 import AllRecentActivities from "./screens/AllRecentActivities";
+import LiveTrackingScreen from "./screens/LiveTrackingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -87,6 +88,8 @@ export default function App() {
             <Stack.Screen name="Order List" component={OrderListScreen} options={{ headerShown: true }} />
             <Stack.Screen name="QRScan" component={QRScanScreen} options={{ headerShown: false }} />
             <Stack.Screen name="AllRecentActivities" component={AllRecentActivities} options={{ headerShown: true }} />
+            <Stack.Screen name="Live Traking" component={LiveTrackingScreen} options={{ headerShown: true }} />
+
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>
