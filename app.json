@@ -10,10 +10,7 @@
     "splash": {
       "image": "./assets/Logo/Logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "extra": {
-      "GOOGLE_MAPS_API_KEY": "AIzaSyCpXDv4FldOMug08hNGFwAn7fGcviuLHF4"
-    }
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true
