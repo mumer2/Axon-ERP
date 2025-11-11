@@ -10,7 +10,10 @@
     "splash": {
       "image": "./assets/Logo/Logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "extra": {
+      "GOOGLE_MAPS_API_KEY": "AIzaSyCpXDv4FldOMug08hNGFwAn7fGcviuLHF4"
+    }
     },
     "ios": {
       "supportsTablet": true
@@ -26,7 +29,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyCHaKIh21TWt6joSNoCLL4Z6e8UYxoBZLU"
+          "apiKey": "AIzaSyCpXDv4FldOMug08hNGFwAn7fGcviuLHF4"
         }
       },
       "edgeToEdgeEnabled": true,

@@ -97,7 +97,7 @@ export default function CustomerScreen({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+    <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
     <View style={styles.container}>
       {/* Search Bar with Add Button */}
       <View style={styles.searchRow}>
@@ -132,9 +132,11 @@ export default function CustomerScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: "#f9fafb" },
   container: {
     flex: 1,
-    padding: 10,
+    paddingTop: 10,
+    paddingHorizontal:10,
     backgroundColor: "#fff",
   },
   searchRow: {

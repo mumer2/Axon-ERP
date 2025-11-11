@@ -204,7 +204,7 @@ export default function OrderListScreen({ navigation, route }) {
 
 // ---------------- STYLES ----------------
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f9fafb", paddingBottom: Platform.OS === "android" ? 20 : 0 },
+  safeArea: { flex: 1, backgroundColor: "#f9fafb" },
   container: { flex: 1, padding: 16 },
   title: { fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#111" },
 
@@ -241,11 +241,11 @@ const styles = StyleSheet.create({
   itemTotal: { fontSize: 14, fontWeight: "bold", color: "#2954E5" },
   removeIcon: { marginLeft: 10 },
 
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 10 },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 6 },
   totalLabel: { fontWeight: "bold", fontSize: 16, color: "#111" },
   totalValue: { fontWeight: "bold", fontSize: 16, color: "#2954E5" },
 
-  submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, marginTop: 20, alignItems: "center" },
+  submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, marginTop: 10, alignItems: "center" },
   submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 
   emptyText: { textAlign: "center", color: "#999", fontSize: 15, marginTop: 60 },

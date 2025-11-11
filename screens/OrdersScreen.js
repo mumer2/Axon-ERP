@@ -74,6 +74,7 @@ export default function OrdersScreen() {
             </View>
           </TouchableOpacity>
         )}
+        showsVerticalScrollIndicator={false}
       />
     </View>
     </SafeAreaView>
@@ -81,7 +82,7 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: { flex: 1, backgroundColor: "#f9fafb", paddingBottom: Platform.OS === "android" ? 20 : 0 },
+    safeArea: { flex: 1, backgroundColor: "#f9fafb" },
   container: {
     flex: 1,
     backgroundColor: "#f7f8fa",

@@ -125,6 +125,9 @@ export default function OrderDetailsScreen({ navigation, route }) {
     }
   };
 
+  // Total distinct items
+  const totalItems = details.length;
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView
@@ -184,26 +187,33 @@ export default function OrderDetailsScreen({ navigation, route }) {
               </View>
             </View>
           )}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 56 }} // adjusted to not leave extra space
           showsVerticalScrollIndicator={false}
         />
 
-        {/* Total Amount */}
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total:</Text>
-          <Text style={styles.totalValue}>Rs {totalAmount.toFixed(2)}</Text>
-        </View>
+       {/* Bottom bar: total items and total amount */}
+<View style={styles.bottomBar}>
+  <View style={styles.totalRow}>
+    <Text style={styles.totalLabel}>Total Items:</Text>
+    <Text style={styles.totalValue}>{totalItems}</Text>
+  </View>
+  <View style={styles.totalRow}>
+    <Text style={styles.totalLabel}>Total Amount:</Text>
+    <Text style={styles.totalValue}>Rs. {totalAmount.toFixed(2)}</Text>
+  </View>
+</View>
+
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f7f8fa", padding: 16 },
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  safeArea: { flex: 1, backgroundColor: "#f7f8fa",paddingTop:10 },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10, paddingHorizontal: 16 },
   heading: { fontSize: 18, fontWeight: "bold", color: "#111" },
   plusBtn: { backgroundColor: "#10B981", padding: 8, borderRadius: 8 },
-  itemCard: { backgroundColor: "#fff", borderRadius: 10, padding: 10, marginBottom: 10, elevation: 2 },
+  itemCard: { backgroundColor: "#fff", borderRadius: 10, padding: 10, marginBottom: 10, elevation: 2, marginHorizontal: 16 },
   itemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   itemName: { fontSize: 16, fontWeight: "600", color: "#333" },
   itemInfo: { color: "#666", marginTop: 5 },
@@ -220,9 +230,30 @@ const styles = StyleSheet.create({
   qtyBtn: { padding: 4 },
   qtyText: { fontSize: 14, fontWeight: "600", marginHorizontal: 6 },
   deleteBtn: { padding: 6 },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 10 },
-  totalLabel: { fontWeight: "bold", fontSize: 16 },
-  totalValue: { fontWeight: "bold", fontSize: 16, color: "#10B981" },
+ bottomBar: {
+  position: "absolute",
+  bottom: 0,
+  left: 10,
+  right:10,
+  backgroundColor: "#fff",
+  padding: 6,
+  borderTopWidth: 1,
+  borderColor: "#ddd",
+},
+totalRow: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginVertical: 1,
+},
+totalLabel: {
+  fontWeight: "bold",
+  fontSize: 16,
+},
+totalValue: {
+  fontWeight: "bold",
+  fontSize: 16,
+  color: "#10B981",
+},
 });
 
 
