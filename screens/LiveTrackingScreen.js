@@ -10,12 +10,14 @@ import {
   Dimensions,
   Platform,
   Alert,
+  KeyboardAvoidingView,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import * as Location from "expo-location";
 import haversine from "haversine";
 import PolylineDecoder from "@mapbox/polyline";
 import { getAllCustomers, searchCustomers } from "../database";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const GOOGLE_MAPS_API_KEY = "AIzaSyCpXDv4FldOMug08hNGFwAn7fGcviuLHF4";
 const { height } = Dimensions.get("window");
@@ -279,6 +281,12 @@ export default function LiveTrackingScreen({ route }) {
 
   // ----------------------- Render -----------------------
   return (
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom","left","right"]}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+          >
     <View style={styles.container}>
       {/* Top Search Bar + Track */}
       <View style={styles.topBar}>
@@ -400,6 +408,8 @@ export default function LiveTrackingScreen({ route }) {
         </View>
       )}
     </View>
+      </KeyboardAvoidingView>
+        </SafeAreaView>
   );
 }
 
