@@ -124,6 +124,9 @@ export default function HomeScreen({ navigation }) {
     else if (item.title === "Live Tracking") {
       navigation.navigate("Live Tracking")
     }
+     else if (item.title === "Update Location") {
+      navigation.navigate("Update Location")
+    }
   }}
             >
               <View style={styles.leftSection}>

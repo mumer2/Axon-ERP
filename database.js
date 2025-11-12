@@ -342,3 +342,38 @@ export const getRecentActivities = async () => {
     ORDER BY id ASC
   `);
 };
+
+
+
+// ---------------------- CUSTOMER LOCATION UPDATE ----------------------
+
+// Update latitude and longitude for a customer
+export const updateCustomerLocation = async (customer_id, latitude, longitude) => {
+  try {
+    await db.runAsync(
+      `UPDATE customer 
+       SET latitude = ?, longitude = ? 
+       WHERE entity_id = ?`,
+      [latitude, longitude, customer_id]
+    );
+    console.log(`Customer ${customer_id} location updated.`);
+  } catch (error) {
+    console.error("Error updating customer location:", error);
+  }
+};
+
+// Optional: Update last_seen along with location
+export const updateCustomerLocationWithLastSeen = async (customer_id, latitude, longitude) => {
+  const last_seen = new Date().toISOString();
+  try {
+    await db.runAsync(
+      `UPDATE customer 
+       SET latitude = ?, longitude = ?, last_seen = ? 
+       WHERE entity_id = ?`,
+      [latitude, longitude, last_seen, customer_id]
+    );
+    console.log(`Customer ${customer_id} location and last_seen updated.`);
+  } catch (error) {
+    console.error("Error updating customer location and last_seen:", error);
+  }
+};

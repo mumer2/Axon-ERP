@@ -15,7 +15,7 @@ export default function RecentActivitySection() {
         id: item.id,
         orderNo: item.booking_id,
         customerName: item.customer_name, // Make sure your DB returns this
-        desc: `${item.item_count} items purchased, Total Rs.${item.total_amount?.toFixed(2) ?? 0}`,
+        desc: `${item.item_count} items purchased,\nTotal Rs.${item.total_amount?.toFixed(2) ?? 0}`,
         date: item.activity_date ? new Date(item.activity_date).toLocaleDateString() : "",
         day: item.activity_date ? new Date(item.activity_date).toLocaleDateString("en-US", { weekday: "short" }) : "",
         bg: "#D9F7E5",
@@ -26,7 +26,7 @@ export default function RecentActivitySection() {
           />
         ),
       }));
-      setActivities(mappedData.reverse().slice(0, 4)); // latest 4
+      setActivities(mappedData.reverse().slice(0, 3)); // latest 4
     } catch (error) {
       console.error("Error fetching recent activities:", error);
     }
@@ -145,8 +145,8 @@ const styles = StyleSheet.create({
   },
   orderNo: { fontSize: 12, fontWeight: "500", color: "#888", marginBottom: 2 },
   cardTitle: { fontSize: 16, fontWeight: "600", color: "#000" },
-  cardDesc: { fontSize: 11, color: "#666", marginTop: 2 },
-  dateContainer: { alignItems: "flex-end", gap: 10 },
+  cardDesc: { fontSize: 12, color: "#666", marginTop: 2 },
+  dateContainer: { alignItems: "flex-end", gap: 20 },
   date: { fontSize: 12, color: "gray", fontWeight: "600" },
   day: { fontSize: 11, color: "#888" },
   icon: { width: 26, height: 26, resizeMode: "contain" },

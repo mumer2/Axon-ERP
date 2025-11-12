@@ -23,6 +23,8 @@ import OrderDetailsScreen from "./screens/OrderDetailsScreen";
 import OrderListScreen from "./screens/OrderListScreen";
 import AllRecentActivities from "./screens/AllRecentActivities";
 import LiveTrackingScreen from "./screens/LiveTrackingScreen";
+import UpdateLocationScreen from "./screens/UpdateLocationScreen";
+import UpdateLocationMapScreen from "./screens/UpdateLocationMapScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -89,6 +91,8 @@ export default function App() {
             <Stack.Screen name="QRScan" component={QRScanScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Recent Activities" component={AllRecentActivities} options={{ headerShown: true }} />
             <Stack.Screen name="Live Tracking" component={LiveTrackingScreen} options={{ headerShown: true }} />
+            <Stack.Screen name="Update Location" component={UpdateLocationScreen} options={{ headerShown: true }} />
+            <Stack.Screen name="Update Location Map" component={UpdateLocationMapScreen} options={{ headerShown: true }} />
 
           </Stack.Navigator>
         </NavigationContainer>
