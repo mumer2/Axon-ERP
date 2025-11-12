@@ -190,7 +190,7 @@ export default function OrderDetailsScreen({ navigation, route }) {
               </View>
             </View>
           )}
-          contentContainerStyle={{ paddingBottom: 56 }}
+          contentContainerStyle={{ paddingBottom: 66 }}
           showsVerticalScrollIndicator={false}
         />
 
@@ -282,6 +282,20 @@ const styles = StyleSheet.create({
   totalLabel: { fontWeight: "bold", fontSize: 16 },
   totalValue: { fontWeight: "bold", fontSize: 16, color: "#10B981" },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

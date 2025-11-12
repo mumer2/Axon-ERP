@@ -169,7 +169,7 @@ export default function OrderListScreen({ navigation, route }) {
           data={orderList}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 130 }}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
            <View style={styles.customerInfo}>
