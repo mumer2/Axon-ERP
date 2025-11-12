@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -17,24 +17,22 @@ import {
   updateOrderBookingLine,
   addRecentActivity,
 } from "../database";
-import { X, Plus, Minus } from "lucide-react-native";
+import { Plus, Minus, X } from "lucide-react-native";
 
 export default function OrderListScreen({ navigation, route }) {
-  const { customerId, orderList: initialList = [], bookingId = null, customerName } =
-    route.params || {};
-  // Filter out undefined items just in case
-  const validInitialList = Array.isArray(initialList)
-    ? initialList.filter((item) => item != null)
-    : [];
+  const customerId = route.params.customerId;
+  const customerName = route.params.customerName || "Customer";
+  const bookingId = route.params.bookingId || null;
+  const initialList = route.params.orderList || [];
 
-  const [orderList, setOrderList] = useState(validInitialList);
+  const [orderList, setOrderList] = useState(
+    Array.isArray(initialList) ? initialList.filter((item) => item != null) : []
+  );
 
-  // Remove item
   const handleRemoveItem = (itemId) => {
     setOrderList((prev) => prev.filter((item) => item.id !== itemId));
   };
 
-  // Increase quantity
   const increaseQty = (itemId) => {
     setOrderList((prev) =>
       prev.map((item) =>
@@ -45,7 +43,6 @@ export default function OrderListScreen({ navigation, route }) {
     );
   };
 
-  // Decrease quantity
   const decreaseQty = (itemId) => {
     setOrderList((prev) =>
       prev
@@ -58,7 +55,6 @@ export default function OrderListScreen({ navigation, route }) {
     );
   };
 
-  // Submit or update order
   const handleSubmitOrder = async () => {
     if (!orderList.length) {
       Alert.alert("Error", "No items in the order list.");
@@ -67,7 +63,6 @@ export default function OrderListScreen({ navigation, route }) {
 
     try {
       if (bookingId) {
-        // Update existing order
         for (const item of orderList) {
           const existingLines = await getOrderLineByBookingAndItem(bookingId, item.id);
           if (existingLines.length > 0) {
@@ -90,7 +85,6 @@ export default function OrderListScreen({ navigation, route }) {
         Alert.alert("Success", "Items added to existing order!");
         navigation.navigate("Order Details", { bookingId, customerId });
       } else {
-        // Create new order
         const orderDate = new Date().toISOString();
         const orderNo = `ORD-${Date.now()}`;
         const createdBy = 1;
@@ -119,10 +113,9 @@ export default function OrderListScreen({ navigation, route }) {
           totalItems += item.quantity;
         }
 
-        // Add recent activity
         await addRecentActivity({
           booking_id: newBookingId,
-          customer_name: customerName || "Customer",
+          customer_name: customerName,
           item_count: totalItems,
           total_amount: totalAmount,
         });
@@ -137,124 +130,131 @@ export default function OrderListScreen({ navigation, route }) {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.itemRow}>
-      <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemPrice}>Rs.{item.price}</Text>
-      </View>
+    <View style={styles.itemCard}>
+      <View style={styles.itemRow}>
+        <View>
+          <Text style={styles.itemName}>{item.name}</Text>
+          <Text style={styles.itemInfo}>
+            Qty: {item.quantity} × Rs {item.price.toFixed(2)}
+          </Text>
+          <Text style={styles.amount}>Total: Rs {item.total.toFixed(2)}</Text>
+        </View>
 
-      <View style={styles.qtyContainer}>
-        <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
-          <Minus size={16} color="#000" />
-        </TouchableOpacity>
+        <View style={styles.actions}>
+          <View style={styles.qtyBox}>
+            <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
+              <Minus size={16} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.qtyText}>{item.quantity}</Text>
+            <TouchableOpacity onPress={() => increaseQty(item.id)} style={styles.qtyBtn}>
+              <Plus size={16} color="#000" />
+            </TouchableOpacity>
+          </View>
 
-        <Text style={styles.qtyText}>{item.quantity}</Text>
-
-        <TouchableOpacity onPress={() => increaseQty(item.id)} style={styles.qtyBtn}>
-          <Plus size={16} color="#000" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.itemRight}>
-        <Text style={styles.itemTotal}>Rs.{item.total.toFixed(2)}</Text>
-        <TouchableOpacity style={styles.removeIcon} onPress={() => handleRemoveItem(item.id)}>
-          <X size={22} color="#EF4444" />
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteBtn} onPress={() => handleRemoveItem(item.id)}>
+            <X size={22} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 
   const totalAmount = orderList.reduce((sum, item) => sum + item.total, 0);
+  const totalItems = orderList.length;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        <View style={styles.container}>
-          <Text style={styles.title}>Your Order List:</Text>
+        <FlatList
+          data={orderList}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+           <View style={styles.customerInfo}>
+                       <Text style={styles.customerLabel}>Customer:</Text>
+                       <Text style={styles.customerName}>{customerName}</Text>
+                     </View>
+          }
+        />
 
-          {orderList.length > 0 ? (
-            <FlatList
-              data={orderList}
-              keyExtractor={(item, index) => (item?.id ? item.id.toString() : index.toString())}
-              renderItem={renderItem}
-              contentContainerStyle={{ paddingBottom: 150 }}
-              showsVerticalScrollIndicator={false}
-            />
-          ) : (
-            <Text style={styles.emptyText}>No items in your order.</Text>
-          )}
+        <View style={styles.bottomBar}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total Items:</Text>
+            <Text style={styles.totalValue}>{totalItems}</Text>
+          </View>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total Amount:</Text>
+            <Text style={styles.totalValue}>Rs. {totalAmount.toFixed(2)}</Text>
+          </View>
 
-          {orderList.length > 0 && (
-            <>
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Total:</Text>
-                <Text style={styles.totalValue}>Rs.{totalAmount.toFixed(2)}</Text>
-              </View>
-
-              <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitOrder}>
-                <Text style={styles.submitText}>{bookingId ? "Add to Order" : "Submit Order"}</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitOrder}>
+            <Text style={styles.submitText}>{bookingId ? "Add to Order" : "Submit Order"}</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-// ---------------- STYLES ----------------
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f9fafb" },
-  container: { flex: 1, padding: 16 },
-  title: { fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#111" },
-
-  itemRow: {
+  safeArea: { flex: 1, backgroundColor: "#f7f8fa" },
+   customerInfo: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
+    marginBottom: 6,
+    marginLeft:12,
+    paddingHorizontal: 4,
+    padding:12,
+  },
+  customerLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#555",
+    marginRight: 6,
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2954E5",
+  },
+
+  itemCard: { backgroundColor: "#fff", borderRadius: 10, padding: 12, marginBottom: 10, marginHorizontal: 16, elevation: 2 },
+  itemRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  itemName: { fontSize: 16, fontWeight: "600", color: "#333" },
+  itemInfo: { color: "#666", marginTop: 4 },
+  amount: { marginTop: 4, fontWeight: "bold", color: "#007bff" },
+
+  actions: { flexDirection: "row", alignItems: "center" },
+  qtyBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: 8, paddingHorizontal: 6, marginRight: 10 },
+  qtyBtn: { padding: 4 },
+  qtyText: { fontSize: 14, fontWeight: "600", marginHorizontal: 6 },
+  deleteBtn: { padding: 6 },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 10,
+    right: 10,
     backgroundColor: "#fff",
-    borderRadius: 10,
     padding: 12,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
   },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", marginVertical: 2 },
+  totalLabel: { fontWeight: "bold", fontSize: 16 },
+  totalValue: { fontWeight: "bold", fontSize: 16, color: "#10B981" },
 
-  itemInfo: { flex: 1 },
-  itemName: { fontSize: 15, fontWeight: "bold", color: "#111" },
-  itemPrice: { fontSize: 13, color: "#555", marginTop: 2 },
-
-  qtyContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    marginRight: 8,
-  },
-  qtyBtn: { paddingHorizontal: 6, paddingVertical: 4 },
-  qtyText: { fontSize: 14, fontWeight: "600", marginHorizontal: 6, color: "#000", width: 24, textAlign: "center" },
-
-  itemRight: { flexDirection: "row", alignItems: "center" },
-  itemTotal: { fontSize: 14, fontWeight: "bold", color: "#2954E5" },
-  removeIcon: { marginLeft: 10 },
-
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 6 },
-  totalLabel: { fontWeight: "bold", fontSize: 16, color: "#111" },
-  totalValue: { fontWeight: "bold", fontSize: 16, color: "#2954E5" },
-
-  submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, marginTop: 10, alignItems: "center" },
+  submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, alignItems: "center", marginTop: 6 },
   submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-
-  emptyText: { textAlign: "center", color: "#999", fontSize: 15, marginTop: 60 },
 });
 
 
 
-
-// import React, { useState } from "react";
+// import React, { useState, useEffect } from "react";
 // import {
 //   View,
 //   Text,
@@ -271,20 +271,26 @@ const styles = StyleSheet.create({
 //   addOrderBookingLine,
 //   getOrderLineByBookingAndItem,
 //   updateOrderBookingLine,
+//   addRecentActivity,
 // } from "../database";
 // import { X, Plus, Minus } from "lucide-react-native";
 
 // export default function OrderListScreen({ navigation, route }) {
-//   const { customerId, orderList: initialList, bookingId = null } = route.params;
-//   const [orderList, setOrderList] = useState(initialList);
+//   const { customerId, orderList: initialList = [], bookingId = null, customerName } =
+//     route.params || {};
+//   // Filter out undefined items just in case
+//   const validInitialList = Array.isArray(initialList)
+//     ? initialList.filter((item) => item != null)
+//     : [];
 
-//   // 🗑️ Remove an item
+//   const [orderList, setOrderList] = useState(validInitialList);
+
+//   // Remove item
 //   const handleRemoveItem = (itemId) => {
-//     const updatedList = orderList.filter((item) => item.id !== itemId);
-//     setOrderList(updatedList);
+//     setOrderList((prev) => prev.filter((item) => item.id !== itemId));
 //   };
 
-//   // ➕ Increase quantity
+//   // Increase quantity
 //   const increaseQty = (itemId) => {
 //     setOrderList((prev) =>
 //       prev.map((item) =>
@@ -295,7 +301,7 @@ const styles = StyleSheet.create({
 //     );
 //   };
 
-//   // ➖ Decrease quantity
+//   // Decrease quantity
 //   const decreaseQty = (itemId) => {
 //     setOrderList((prev) =>
 //       prev
@@ -308,16 +314,16 @@ const styles = StyleSheet.create({
 //     );
 //   };
 
-//   // ✅ Submit or update order
+//   // Submit or update order
 //   const handleSubmitOrder = async () => {
-//     if (orderList.length === 0) {
+//     if (!orderList.length) {
 //       Alert.alert("Error", "No items in the order list.");
 //       return;
 //     }
 
 //     try {
 //       if (bookingId) {
-//         // 👈 Update existing order
+//         // Update existing order
 //         for (const item of orderList) {
 //           const existingLines = await getOrderLineByBookingAndItem(bookingId, item.id);
 //           if (existingLines.length > 0) {
@@ -340,7 +346,7 @@ const styles = StyleSheet.create({
 //         Alert.alert("Success", "Items added to existing order!");
 //         navigation.navigate("Order Details", { bookingId, customerId });
 //       } else {
-//         // 👈 Create new order
+//         // Create new order
 //         const orderDate = new Date().toISOString();
 //         const orderNo = `ORD-${Date.now()}`;
 //         const createdBy = 1;
@@ -354,6 +360,9 @@ const styles = StyleSheet.create({
 //           created_date: createdDate,
 //         });
 
+//         let totalAmount = 0;
+//         let totalItems = 0;
+
 //         for (const item of orderList) {
 //           await addOrderBookingLine({
 //             booking_id: newBookingId,
@@ -362,13 +371,23 @@ const styles = StyleSheet.create({
 //             unit_price: item.price,
 //             amount: item.total,
 //           });
+//           totalAmount += item.total;
+//           totalItems += item.quantity;
 //         }
+
+//         // Add recent activity
+//         await addRecentActivity({
+//           booking_id: newBookingId,
+//           customer_name: customerName || "Customer",
+//           item_count: totalItems,
+//           total_amount: totalAmount,
+//         });
 
 //         Alert.alert("Success", "Order submitted successfully!");
 //         navigation.navigate("All Orders", { customerId });
 //       }
 //     } catch (error) {
-//       console.error(error);
+//       console.error("Order submission error:", error);
 //       Alert.alert("Error", "Failed to submit order");
 //     }
 //   };
@@ -380,7 +399,6 @@ const styles = StyleSheet.create({
 //         <Text style={styles.itemPrice}>Rs.{item.price}</Text>
 //       </View>
 
-//       {/* Quantity controls */}
 //       <View style={styles.qtyContainer}>
 //         <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
 //           <Minus size={16} color="#000" />
@@ -393,7 +411,6 @@ const styles = StyleSheet.create({
 //         </TouchableOpacity>
 //       </View>
 
-//       {/* Total + delete */}
 //       <View style={styles.itemRight}>
 //         <Text style={styles.itemTotal}>Rs.{item.total.toFixed(2)}</Text>
 //         <TouchableOpacity style={styles.removeIcon} onPress={() => handleRemoveItem(item.id)}>
@@ -403,19 +420,18 @@ const styles = StyleSheet.create({
 //     </View>
 //   );
 
+//   const totalAmount = orderList.reduce((sum, item) => sum + item.total, 0);
+
 //   return (
 //     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
-//       <KeyboardAvoidingView
-//         style={{ flex: 1 }}
-//         behavior={Platform.OS === "ios" ? "padding" : "height"}
-//       >
+//       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
 //         <View style={styles.container}>
 //           <Text style={styles.title}>Your Order List:</Text>
 
 //           {orderList.length > 0 ? (
 //             <FlatList
 //               data={orderList}
-//               keyExtractor={(item, index) => index.toString()}
+//               keyExtractor={(item, index) => (item?.id ? item.id.toString() : index.toString())}
 //               renderItem={renderItem}
 //               contentContainerStyle={{ paddingBottom: 150 }}
 //               showsVerticalScrollIndicator={false}
@@ -428,9 +444,7 @@ const styles = StyleSheet.create({
 //             <>
 //               <View style={styles.totalRow}>
 //                 <Text style={styles.totalLabel}>Total:</Text>
-//                 <Text style={styles.totalValue}>
-//                   Rs.{orderList.reduce((sum, item) => sum + item.total, 0).toFixed(2)}
-//                 </Text>
+//                 <Text style={styles.totalValue}>Rs.{totalAmount.toFixed(2)}</Text>
 //               </View>
 
 //               <TouchableOpacity style={styles.submitBtn} onPress={handleSubmitOrder}>
@@ -446,7 +460,7 @@ const styles = StyleSheet.create({
 
 // // ---------------- STYLES ----------------
 // const styles = StyleSheet.create({
-//   safeArea: { flex: 1, backgroundColor: "#f9fafb", paddingBottom: Platform.OS === "android" ? 20 : 0 },
+//   safeArea: { flex: 1, backgroundColor: "#f9fafb" },
 //   container: { flex: 1, padding: 16 },
 //   title: { fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#111" },
 
@@ -483,11 +497,11 @@ const styles = StyleSheet.create({
 //   itemTotal: { fontSize: 14, fontWeight: "bold", color: "#2954E5" },
 //   removeIcon: { marginLeft: 10 },
 
-//   totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 10 },
+//   totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16, borderTopWidth: 1, borderColor: "#ddd", paddingTop: 6 },
 //   totalLabel: { fontWeight: "bold", fontSize: 16, color: "#111" },
 //   totalValue: { fontWeight: "bold", fontSize: 16, color: "#2954E5" },
 
-//   submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, marginTop: 20, alignItems: "center" },
+//   submitBtn: { backgroundColor: "#10B981", padding: 16, borderRadius: 12, marginTop: 10, alignItems: "center" },
 //   submitText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
 
 //   emptyText: { textAlign: "center", color: "#999", fontSize: 15, marginTop: 60 },

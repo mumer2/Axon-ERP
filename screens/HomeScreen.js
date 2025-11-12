@@ -25,16 +25,7 @@ export default function HomeScreen({ navigation }) {
         />
       ),
     },
-    {
-      title: "Delivery",
-      icon: (
-        <Image
-          source={require("../assets/Icons/Delivery.png")}
-          style={styles.icon}
-        />
-      ),
-    },
-    {
+     {
       title: "Payment Recovery",
       icon: (
         <Image
@@ -43,6 +34,16 @@ export default function HomeScreen({ navigation }) {
         />
       ),
     },
+    {
+      title: "Update Location",
+      icon: (
+        <Image
+          source={require("../assets/Icons/UpdateLocation.png")}
+          style={styles.icon}
+        />
+      ),
+    },
+   
     {
       title: "Live Tracking",
       icon: (
