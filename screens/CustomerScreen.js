@@ -10,6 +10,7 @@ import {
 import { initDB, getAllCustomers, searchCustomers, updateVisited } from "../database";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MapPin } from "lucide-react-native"; // ✅ Added for location icon
 
 const getAvatarColor = (name) => {
   const colors = ["#FFB6C1", "#87CEFA", "#90EE90", "#FFA07A", "#DDA0DD"];
@@ -49,6 +50,10 @@ export default function CustomerScreen({ navigation }) {
     fetchCustomers();
   };
 
+   const handleTrack = (customer) => {
+    navigation.navigate("Live Tracking", { customer });
+  };
+
   const handleCustomerPress = (customer) => {
     // Navigate to ItemsScreen and pass the selected customer's ID
     navigation.navigate("Items", { customerId: customer.entity_id, customerName: customer.name });
@@ -70,6 +75,18 @@ export default function CustomerScreen({ navigation }) {
         
         <View style={styles.nameRow}>
           <Text style={styles.name}>{item.name}</Text>
+
+          
+        </View>
+
+        {/* Phone and Last Seen */}
+        <Text style={styles.phone}>📞 {item.phone}</Text>
+        <Text style={styles.lastSeen}>Last seen: {item.last_seen}</Text>
+      </View>
+
+      {/* Visited or No Visited  AND Location Icons*/}
+
+      <View style={styles.iconContainer}>
          <TouchableOpacity onPress={() => toggleVisited(item.entity_id, item.visited)}>
   <View
     style={[
@@ -87,12 +104,28 @@ export default function CustomerScreen({ navigation }) {
   </View>
 </TouchableOpacity>
 
-        </View>
-
-        {/* Phone and Last Seen */}
-        <Text style={styles.phone}>📞 {item.phone}</Text>
-        <Text style={styles.lastSeen}>Last seen: {item.last_seen}</Text>
-      </View>
+{/* Location Icon */}
+            <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("Live Tracking", {
+                customer: {
+                  id: item.entity_id,
+                  name: item.name,
+                  latitude: item.latitude,
+                  longitude: item.longitude,
+                  visited: item.visited,
+                },
+              })
+            }
+          >
+            <Feather
+              name="map-pin"
+              size={20}
+              color="#007bff"
+              style={{ marginTop: 6 }}
+            />
+            </TouchableOpacity>
+</View>
     </TouchableOpacity>
   );
 
@@ -234,7 +267,23 @@ tick: {
   textAlign: "center",
 },
 
+iconContainer:{
+  textAlign:"right",
+  gap:12,
+},
+
+ locationButton: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
 });
+
+
+
+
+
+
 
 
 
@@ -249,7 +298,8 @@ tick: {
 //   TouchableOpacity,
 // } from "react-native";
 // import { initDB, getAllCustomers, searchCustomers, updateVisited } from "../database";
-// import { Feather,plus } from "@expo/vector-icons"; // expo vector icons
+// import { Feather } from "@expo/vector-icons";
+// import { SafeAreaView } from "react-native-safe-area-context";
 
 // const getAvatarColor = (name) => {
 //   const colors = ["#FFB6C1", "#87CEFA", "#90EE90", "#FFA07A", "#DDA0DD"];
@@ -257,7 +307,7 @@ tick: {
 //   return colors[charCode % colors.length];
 // };
 
-// export default function CustomerScreen({navigation}) {
+// export default function CustomerScreen({ navigation }) {
 //   const [customers, setCustomers] = useState([]);
 //   const [search, setSearch] = useState("");
 
@@ -289,8 +339,16 @@ tick: {
 //     fetchCustomers();
 //   };
 
+//   const handleCustomerPress = (customer) => {
+//     // Navigate to ItemsScreen and pass the selected customer's ID
+//     navigation.navigate("Items", { customerId: customer.entity_id, customerName: customer.name });
+//   };
+
 //   const renderItem = ({ item }) => (
-//     <View style={styles.itemContainer}>
+//     <TouchableOpacity
+//       style={styles.itemContainer}
+//       onPress={() => handleCustomerPress(item)}
+//     >
 //       {/* Letter Avatar */}
 //       <View
 //         style={[styles.avatar, { backgroundColor: getAvatarColor(item.name) }]}
@@ -299,46 +357,59 @@ tick: {
 //       </View>
 
 //       <View style={styles.infoContainer}>
-//         {/* Name and Visited Status */}
+        
 //         <View style={styles.nameRow}>
 //           <Text style={styles.name}>{item.name}</Text>
-//           <TouchableOpacity onPress={() => toggleVisited(item.entity_id, item.visited)}>
-//             <Text style={[styles.visited, { color: item.visited ? "green" : "red" }]}>
-//               {item.visited ? "✅ Visited" : "❌ Not Visited"}
-//             </Text>
-//           </TouchableOpacity>
+//          <TouchableOpacity onPress={() => toggleVisited(item.entity_id, item.visited)}>
+//   <View
+//     style={[
+//       styles.visitedBox,
+//       {
+//         backgroundColor: item.visited ? "green" : "transparent",
+//         borderWidth: 1,
+//         borderColor: item.visited ? "green" : "#555",
+//       },
+//     ]}
+//   >
+//     <Text style={[styles.tick, { color: item.visited ? "#fff" : "#555" }]}>
+//       ✓
+//     </Text>
+//   </View>
+// </TouchableOpacity>
+
 //         </View>
 
 //         {/* Phone and Last Seen */}
 //         <Text style={styles.phone}>📞 {item.phone}</Text>
 //         <Text style={styles.lastSeen}>Last seen: {item.last_seen}</Text>
 //       </View>
-//     </View>
+//     </TouchableOpacity>
 //   );
 
 //   return (
+//     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
 //     <View style={styles.container}>
-//       {/* Search Bar with Icon */}
-//      <View style={styles.searchRow}>
-//   <View style={styles.searchContainer}>
-//     <TextInput
-//       style={styles.searchBar}
-//       placeholder="Search Customer..."
-//       value={search}
-//       onChangeText={handleSearch}
-//     />
-//     <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
-//   </View>
+//       {/* Search Bar with Add Button */}
+//       <View style={styles.searchRow}>
+//         <View style={styles.searchContainer}>
+//           <TextInput
+//             style={styles.searchBar}
+//             placeholder="Search Customer..."
+//             value={search}
+//             onChangeText={handleSearch}
+//           />
+//           <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
+//         </View>
 
-//   <TouchableOpacity
-//     style={styles.addButton}
-//     onPress={() => navigation.navigate("AddCustomer")}
-//   >
-//     <Feather name="plus" size={28} color="blue" />
-//   </TouchableOpacity>
-// </View>
+//         {/* <TouchableOpacity
+//           style={styles.addButton}
+//           onPress={() => navigation.navigate("AddCustomer")}
+//         >
+//           <Feather name="plus" size={28} color="blue" />
+//         </TouchableOpacity> */}
+//       </View>
 
-
+//       {/* Customer List */}
 //       <FlatList
 //         data={customers}
 //         keyExtractor={(item) => item.entity_id.toString()}
@@ -346,52 +417,58 @@ tick: {
 //         showsVerticalScrollIndicator={false}
 //       />
 //     </View>
+//     </SafeAreaView>
 //   );
 // }
 
 // const styles = StyleSheet.create({
+//     safeArea: { flex: 1, backgroundColor: "#f9fafb" },
 //   container: {
 //     flex: 1,
-//     padding: 10,
+//     paddingTop: 10,
+//     paddingHorizontal:10,
 //     backgroundColor: "#fff",
 //   },
 //   searchRow: {
-//   flexDirection: "row",
-//   alignItems: "center",
-//   marginBottom: 10,
-// },
-// searchContainer: {
-//   flex: 1,
-//   flexDirection: "row",
-//   alignItems: "center",
-//   borderWidth: 1,
-//   borderColor: "#ccc",
-//   borderRadius: 8,
-//   paddingHorizontal: 10,
-//   backgroundColor: "#f9f9f9",
-// },
-// searchBar: {
-//   flex: 1,
-//   height: 40,
-// },
-// searchIcon: {
-//   marginLeft: 10,
-// },
-// addButton: {
-//   marginLeft: 10,
-//   padding: 4,
-//   justifyContent: "center",
-//   alignItems: "center",
-//   backgroundColor: "#f1f1f9",
-//   borderRadius:10,
-// },
-
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 10,
+//   },
+//   searchContainer: {
+//     flex: 1,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     borderRadius: 8,
+//     paddingHorizontal: 10,
+//     backgroundColor: "#f9f9f9",
+//   },
+//   searchBar: {
+//     flex: 1,
+//     height: 40,
+//   },
+//   searchIcon: {
+//     marginLeft: 10,
+//   },
+//   addButton: {
+//     marginLeft: 10,
+//     padding: 4,
+//     justifyContent: "center",
+//     alignItems: "center",
+//     backgroundColor: "#f1f1f9",
+//     borderRadius: 10,
+//   },
 //   itemContainer: {
 //     flexDirection: "row",
 //     padding: 10,
 //     borderBottomWidth: 1,
 //     borderColor: "#eee",
 //     alignItems: "center",
+//     borderRadius: 8,
+//     marginBottom: 6,
+//     backgroundColor: "#fff",
+//     elevation: 1,
 //   },
 //   avatar: {
 //     width: 50,
@@ -428,6 +505,23 @@ tick: {
 //     marginTop: 2,
 //   },
 //   visited: {
-//     fontWeight: "bold",
+//      width: 24,
+//     height: 24,
+//     borderRadius: 4,
+//     justifyContent: "center",
+//     alignItems: "center",
 //   },
+//   visitedBox: {
+//   width: 24,
+//   height: 24,
+//   borderRadius: 4,
+//   justifyContent: "center",
+//   alignItems: "center",
+// },
+// tick: {
+//   fontWeight: "bold",
+//   fontSize: 16,
+//   textAlign: "center",
+// },
+
 // });
