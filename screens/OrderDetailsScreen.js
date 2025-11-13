@@ -135,7 +135,7 @@ export default function OrderDetailsScreen({ navigation, route }) {
         <View style={styles.headerCard}>
           <View style={styles.headerInfo}>
             {/* <Text style={styles.orderText}>Order No: {orderNo}</Text> */}
-            <Text style={styles.orderText}>Customer Name:</Text>
+            <Text style={styles.orderText}>Customer Name</Text>
             <Text style={styles.customerText}>{customerName}</Text>
           </View>
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   headerInfo: { flex: 1 },
-  orderText: { fontSize: 16, fontWeight: "bold", color: "#111", marginBottom: 4 },
+  orderText: { fontSize: 14, fontWeight: 400, color: "gray", marginBottom: 4 },
   customerText: { fontSize: 18, fontWeight: "bold", color: "#2954E5" },
   plusBtn: {
     backgroundColor: "#10B981",

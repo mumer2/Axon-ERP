@@ -121,7 +121,9 @@ export default function OrderListScreen({ navigation, route }) {
         });
 
         Alert.alert("Success", "Order submitted successfully!");
-        navigation.navigate("All Orders", { customerId });
+        // navigation.navigate("All Orders", { customerId });
+        navigation.navigate("Home");
+
       }
     } catch (error) {
       console.error("Order submission error:", error);
