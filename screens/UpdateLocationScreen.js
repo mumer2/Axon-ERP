@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: "row",
     marginBottom: 6,
+    borderRightWidth: 0,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 2,

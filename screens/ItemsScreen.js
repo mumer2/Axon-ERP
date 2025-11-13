@@ -203,7 +203,7 @@ export default function ItemsScreen({ navigation, route }) {
         source={
           item.image
             ? { uri: item.image }
-            : require("../assets/Images/Placeholder.jpg")
+            : require("../assets/Images/placeholder.png")
         }
         style={styles.itemImage}
       />
