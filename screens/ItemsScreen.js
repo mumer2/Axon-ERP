@@ -19,20 +19,21 @@ import {
   addOrderBookingLine,
   updateOrderBookingLine,
 } from "../database";
-import { Search, Plus, Minus } from "lucide-react-native";
+import { Search, Plus, Minus, ShoppingCart } from "lucide-react-native";
 
 export default function ItemsScreen({ navigation, route }) {
   const customerId = route.params.customerId;
   const customerName = route.params.customerName || "Customer";
   const bookingId = route.params.bookingId || null;
 
+  const [imageErrors, setImageErrors] = useState({});
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
   const [quantity, setQuantity] = useState({});
   const [newItemsToAdd, setNewItemsToAdd] = useState([]);
-  const [filterType, setFilterType] = useState(""); // selected filter
-  const [types, setTypes] = useState([]); // all available product types
-  const [changedQuantity, setChangedQuantity] = useState({}); // track changes for Add button
+  const [filterType, setFilterType] = useState("");
+  const [types, setTypes] = useState([]);
+  const [changedQuantity, setChangedQuantity] = useState({});
 
   useEffect(() => {
     const loadDB = async () => {
@@ -44,10 +45,14 @@ export default function ItemsScreen({ navigation, route }) {
     loadDB();
   }, []);
 
+  useEffect(() => {
+    setImageErrors({});
+  }, [items]);
+
   const loadProductTypes = async () => {
     const allItems = await getItems();
     const uniqueTypes = [...new Set(allItems.map((i) => i.type).filter(Boolean))];
-    setTypes(uniqueTypes);
+    setTypes(["All Items", ...uniqueTypes]);
   };
 
   const loadExistingOrder = async () => {
@@ -62,7 +67,6 @@ export default function ItemsScreen({ navigation, route }) {
           quantity: line.order_qty,
           total: line.order_qty * item.price,
         });
-        // Set initial quantity input
         setQuantity((prev) => ({ ...prev, [item.id]: line.order_qty.toString() }));
       }
     }
@@ -71,7 +75,7 @@ export default function ItemsScreen({ navigation, route }) {
 
   const fetchItems = async (query = "", typeFilter = "") => {
     let data = await getItems(query);
-    if (typeFilter) {
+    if (typeFilter && typeFilter !== "All Items") {
       data = data.filter((item) => item.type === typeFilter);
     }
     setItems(data);
@@ -83,8 +87,9 @@ export default function ItemsScreen({ navigation, route }) {
   };
 
   const handleFilterChange = (type) => {
-    setFilterType(type);
-    fetchItems(search, type);
+    const nextType = filterType === type ? "All Items" : type;
+    setFilterType(nextType);
+    fetchItems(search, nextType);
   };
 
   // Quantity handlers
@@ -144,7 +149,7 @@ export default function ItemsScreen({ navigation, route }) {
       const newItem = { ...item, quantity: qty, total: qty * item.price };
       setNewItemsToAdd([...newItemsToAdd, newItem]);
     }
-    setChangedQuantity((prev) => ({ ...prev, [item.id]: false })); // reset after add
+    setChangedQuantity((prev) => ({ ...prev, [item.id]: false }));
   };
 
   const handleProceed = async () => {
@@ -194,55 +199,75 @@ export default function ItemsScreen({ navigation, route }) {
   };
 
   const handleViewOrders = () => {
-    navigation.navigate("All Orders", { customerId });
+    navigation.navigate("All Orders", { customerId, customerName });
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Image
-        source={
-          item.image
-            ? { uri: item.image }
-            : require("../assets/Images/placeholder.png")
-        }
-        style={styles.itemImage}
-      />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemPrice}>Rs.{item.price}</Text>
+  const markImageError = (itemId) => {
+    setImageErrors((prev) => ({ ...prev, [itemId]: true }));
+  };
 
-        <View style={styles.bottomRow}>
-          <View style={styles.qtyBox}>
-            <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
-              <Minus size={16} color="#000" />
-            </TouchableOpacity>
+  const renderItem = ({ item }) => {
+    const useUri =
+      !imageErrors[item.id] &&
+      item.image &&
+      typeof item.image === "string" &&
+      item.image.trim() !== "";
 
-            <TextInput
-              placeholder="0"
-              keyboardType="number-pad"
-              style={styles.qtyInput}
-              value={quantity[item.id] ? quantity[item.id].toString() : ""}
-              onChangeText={(val) => handleQuantityChange(item.id, val)}
-            />
+    return (
+      <View style={styles.itemContainer}>
+        <Image
+          source={
+            useUri
+              ? { uri: item.image.trim() }
+              : require("../assets/Images/placeholderItem.png")
+          }
+          style={styles.itemImage}
+          resizeMode="cover"
+          onError={() => markImageError(item.id)}
+        />
 
-            <TouchableOpacity onPress={() => increaseQty(item.id)} style={styles.qtyBtn}>
-              <Plus size={16} color="#000" />
-            </TouchableOpacity>
+        <View style={styles.itemDetails}>
+          <Text style={styles.itemName} numberOfLines={1}>
+            {item.name}
+          </Text>
+
+          <View style={styles.stockRow}>
+            <ShoppingCart size={14} color="#10B981" />
+            <Text style={styles.stockText}> {item.stock || 0}</Text>
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.addBtn,
-              { display: changedQuantity[item.id] ? "flex" : "none" },
-            ]}
-            onPress={() => handleAddItem(item)}
-          >
-            <Text style={styles.addText}>Add</Text>
-          </TouchableOpacity>
+          <Text style={styles.itemPrice}>Rs.{item.price}</Text>
+
+          <View style={styles.bottomRow}>
+            <View style={styles.qtyBox}>
+              <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
+                <Minus size={16} color="#000" />
+              </TouchableOpacity>
+
+              <TextInput
+                placeholder="0"
+                keyboardType="number-pad"
+                style={styles.qtyInput}
+                value={quantity[item.id] ? quantity[item.id].toString() : ""}
+                onChangeText={(val) => handleQuantityChange(item.id, val)}
+              />
+
+              <TouchableOpacity onPress={() => increaseQty(item.id)} style={styles.qtyBtn}>
+                <Plus size={16} color="#000" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.addBtn, { display: changedQuantity[item.id] ? "flex" : "none" }]}
+              onPress={() => handleAddItem(item)}
+            >
+              <Text style={styles.addText}>Add</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
@@ -253,7 +278,6 @@ export default function ItemsScreen({ navigation, route }) {
             <Text style={styles.customerName}>{customerName}</Text>
           </View>
 
-          {/* Search */}
           <View style={styles.searchRow}>
             <View style={styles.searchContainer}>
               <TextInput
@@ -268,13 +292,12 @@ export default function ItemsScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
 
-            {/* Filter Dropdown - scrollable */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
               {types.map((type) => (
                 <TouchableOpacity
                   key={type}
                   style={[styles.filterBtn, filterType === type && styles.filterBtnActive]}
-                  onPress={() => handleFilterChange(filterType === type ? "" : type)}
+                  onPress={() => handleFilterChange(type)}
                 >
                   <Text style={[styles.filterText, filterType === type && styles.filterTextActive]}>
                     {type}
@@ -292,26 +315,45 @@ export default function ItemsScreen({ navigation, route }) {
             showsVerticalScrollIndicator={false}
           />
 
-          <View style={styles.bottomButtons}>
-            <TouchableOpacity
-              style={[
-                styles.proceedBtn,
-                { backgroundColor: newItemsToAdd.length > 0 ? "#10B981" : "#A7F3D0" },
-              ]}
-              onPress={handleProceed}
-              disabled={newItemsToAdd.length === 0}
-            >
-              <Text style={styles.proceedText}>
-                {bookingId
-                  ? `Add to Order (${newItemsToAdd.length} items)`
-                  : `Proceed (${newItemsToAdd.length} items)`}
-              </Text>
-            </TouchableOpacity>
+          
+          <View style={[
+  styles.bottomButtons,
+  bookingId ? { justifyContent: "center" } : { justifyContent: "space-between" }
+]}>
+  {bookingId ? (
+    <TouchableOpacity
+      style={[
+        styles.proceedBtn,
+        { backgroundColor: newItemsToAdd.length > 0 ? "#10B981" : "#A7F3D0", flex: 0.9 }
+      ]}
+      onPress={handleProceed}
+      disabled={newItemsToAdd.length === 0}
+    >
+      <Text style={styles.proceedText}>
+        Add to Order ({newItemsToAdd.length} items)
+      </Text>
+    </TouchableOpacity>
+  ) : (
+    <>
+      <TouchableOpacity
+        style={[
+          styles.proceedBtn,
+          { backgroundColor: newItemsToAdd.length > 0 ? "#10B981" : "#A7F3D0" }
+        ]}
+        onPress={handleProceed}
+        disabled={newItemsToAdd.length === 0}
+      >
+        <Text style={styles.proceedText}>
+          Proceed ({newItemsToAdd.length} items)
+        </Text>
+      </TouchableOpacity>
 
-            <TouchableOpacity style={styles.viewAllBtn} onPress={handleViewOrders}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
+      <TouchableOpacity style={styles.viewAllBtn} onPress={handleViewOrders}>
+        <Text style={styles.viewAllText}>View All</Text>
+      </TouchableOpacity>
+    </>
+  )}
+</View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -356,16 +398,31 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: "#fff",
     marginBottom: 2,
-    padding: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 10,
   },
-  itemImage: { width: 60, height: 60, borderRadius: 8, marginTop: 4 },
+  itemImage: { width: 60, height: 60, borderRadius: 8 },
   itemDetails: { flex: 1, marginLeft: 12 },
   itemName: { fontWeight: "bold", fontSize: 16 },
+  stockRow: { flexDirection: "row", alignItems: "center", marginTop: 2 },
+  stockText: { color: "#10B981", marginLeft: 4, fontSize: 12, fontWeight: "500" },
   itemPrice: { color: "#555", marginTop: 4 },
 
-  bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginTop: 8 },
-  qtyBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: 8, marginRight: 8, paddingHorizontal: 6 },
+  bottomRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginTop: 8,
+  },
+  qtyBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    marginRight: 8,
+    paddingHorizontal: 6,
+  },
   qtyBtn: { padding: 6 },
   qtyInput: { width: 40, textAlign: "center", fontSize: 14, color: "#000" },
 
@@ -397,9 +454,6 @@ const styles = StyleSheet.create({
 
 
 
-
-
-
 // import React, { useEffect, useState } from "react";
 // import {
 //   View,
@@ -410,8 +464,8 @@ const styles = StyleSheet.create({
 //   StyleSheet,
 //   Image,
 //   Alert,
-//   Platform,
 //   KeyboardAvoidingView,
+//   ScrollView,
 // } from "react-native";
 // import { SafeAreaView } from "react-native-safe-area-context";
 // import {
@@ -431,20 +485,27 @@ const styles = StyleSheet.create({
 //   const [items, setItems] = useState([]);
 //   const [search, setSearch] = useState("");
 //   const [quantity, setQuantity] = useState({});
-//   const [existingOrderItems, setExistingOrderItems] = useState([]);
 //   const [newItemsToAdd, setNewItemsToAdd] = useState([]);
-//   const [totalNewItems, setTotalNewItems] = useState(0);
+//   const [filterType, setFilterType] = useState(""); // selected filter
+//   const [types, setTypes] = useState([]); // all available product types
+//   const [changedQuantity, setChangedQuantity] = useState({}); // track changes for Add button
 
 //   useEffect(() => {
 //     const loadDB = async () => {
 //       await initDB();
-//       fetchItems();
+//       await fetchItems();
+//       await loadProductTypes();
 //       if (bookingId) await loadExistingOrder();
 //     };
 //     loadDB();
 //   }, []);
 
-//   // Load existing order items
+//   const loadProductTypes = async () => {
+//     const allItems = await getItems();
+//     const uniqueTypes = [...new Set(allItems.map((i) => i.type).filter(Boolean))];
+//     setTypes(uniqueTypes);
+//   };
+
 //   const loadExistingOrder = async () => {
 //     const existingOrderList = [];
 //     const allItems = await getItems();
@@ -457,71 +518,89 @@ const styles = StyleSheet.create({
 //           quantity: line.order_qty,
 //           total: line.order_qty * item.price,
 //         });
+//         // Set initial quantity input
+//         setQuantity((prev) => ({ ...prev, [item.id]: line.order_qty.toString() }));
 //       }
 //     }
-//     setExistingOrderItems(existingOrderList);
+//     setNewItemsToAdd(existingOrderList);
 //   };
 
-//   const fetchItems = async (query = "") => {
-//     const data = await getItems(query);
+//   const fetchItems = async (query = "", typeFilter = "") => {
+//     let data = await getItems(query);
+//     if (typeFilter) {
+//       data = data.filter((item) => item.type === typeFilter);
+//     }
 //     setItems(data);
 //   };
 
 //   const handleSearch = (text) => {
 //     setSearch(text);
-//     fetchItems(text);
+//     fetchItems(text, filterType);
 //   };
 
+//   const handleFilterChange = (type) => {
+//     setFilterType(type);
+//     fetchItems(search, type);
+//   };
+
+//   // Quantity handlers
 //   const increaseQty = (itemId) => {
-//     const current = parseInt(quantity[itemId] || "0");
-//     setQuantity({ ...quantity, [itemId]: (current + 1).toString() });
+//     const current = parseInt(quantity[itemId] || "0") + 1;
+//     setQuantity({ ...quantity, [itemId]: current.toString() });
+//     setChangedQuantity({ ...changedQuantity, [itemId]: true });
+
+//     const index = newItemsToAdd.findIndex((i) => i.id === itemId);
+//     if (index !== -1) {
+//       const updatedList = [...newItemsToAdd];
+//       updatedList[index].quantity = current;
+//       updatedList[index].total = current * updatedList[index].price;
+//       setNewItemsToAdd(updatedList);
+//     }
 //   };
 
 //   const decreaseQty = (itemId) => {
-//     const current = parseInt(quantity[itemId] || "0");
-//     if (current > 1) {
-//       setQuantity({ ...quantity, [itemId]: (current - 1).toString() });
-//     } else {
-//       setQuantity({ ...quantity, [itemId]: "" });
+//     const current = parseInt(quantity[itemId] || "0") - 1;
+//     const newVal = current > 0 ? current.toString() : "";
+//     setQuantity({ ...quantity, [itemId]: newVal });
+//     setChangedQuantity({ ...changedQuantity, [itemId]: true });
+
+//     const index = newItemsToAdd.findIndex((i) => i.id === itemId);
+//     if (index !== -1) {
+//       if (current > 0) {
+//         const updatedList = [...newItemsToAdd];
+//         updatedList[index].quantity = current;
+//         updatedList[index].total = current * updatedList[index].price;
+//         setNewItemsToAdd(updatedList);
+//       } else {
+//         setNewItemsToAdd((prev) => prev.filter((i) => i.id !== itemId));
+//       }
 //     }
 //   };
 
 //   const handleQuantityChange = (itemId, val) => {
 //     const num = val.replace(/[^0-9]/g, "");
 //     setQuantity({ ...quantity, [itemId]: num });
+//     setChangedQuantity({ ...changedQuantity, [itemId]: true });
+
+//     const index = newItemsToAdd.findIndex((i) => i.id === itemId);
+//     if (num === "" && index !== -1) {
+//       setNewItemsToAdd((prev) => prev.filter((i) => i.id !== itemId));
+//     } else if (index !== -1) {
+//       const updatedList = [...newItemsToAdd];
+//       updatedList[index].quantity = parseInt(num);
+//       updatedList[index].total = updatedList[index].quantity * updatedList[index].price;
+//       setNewItemsToAdd(updatedList);
+//     }
 //   };
 
 //   const handleAddItem = (item) => {
-//     const qty = parseInt(quantity[item.id] || "0");
-//     if (!qty || qty <= 0) {
-//       Alert.alert("Error", "Please enter a valid quantity");
-//       return;
-//     }
-
 //     const existingIndex = newItemsToAdd.findIndex((o) => o.id === item.id);
-//     let updatedList = [...newItemsToAdd];
-
-//     if (existingIndex !== -1) {
-//       const updatedQty = updatedList[existingIndex].quantity + qty;
-//       updatedList[existingIndex] = {
-//         ...updatedList[existingIndex],
-//         quantity: updatedQty,
-//         total: updatedQty * item.price,
-//       };
-//     } else {
-//       updatedList.push({
-//         ...item,
-//         quantity: qty,
-//         total: qty * item.price,
-//       });
+//     const qty = parseInt(quantity[item.id] || "1");
+//     if (existingIndex === -1) {
+//       const newItem = { ...item, quantity: qty, total: qty * item.price };
+//       setNewItemsToAdd([...newItemsToAdd, newItem]);
 //     }
-
-//     setNewItemsToAdd(updatedList);
-//     setQuantity({ ...quantity, [item.id]: "" });
-
-//     // Update total new items
-//     const totalQty = updatedList.reduce((sum, i) => sum + i.quantity, 0);
-//     setTotalNewItems(totalQty);
+//     setChangedQuantity((prev) => ({ ...prev, [item.id]: false })); // reset after add
 //   };
 
 //   const handleProceed = async () => {
@@ -532,18 +611,13 @@ const styles = StyleSheet.create({
 
 //     try {
 //       if (bookingId) {
-//         // Add only new items to existing booking
 //         for (const item of newItemsToAdd) {
-//           const existingLines = await getOrderLineByBookingAndItem(
-//             bookingId,
-//             item.id
-//           );
+//           const existingLines = await getOrderLineByBookingAndItem(bookingId, item.id);
 //           if (existingLines.length > 0) {
 //             const existingLine = existingLines[0];
-//             const newQty = existingLine.order_qty + item.quantity;
 //             await updateOrderBookingLine(existingLine.line_id, {
-//               order_qty: newQty,
-//               amount: newQty * item.price,
+//               order_qty: item.quantity,
+//               amount: item.quantity * item.price,
 //             });
 //           } else {
 //             await addOrderBookingLine({
@@ -555,13 +629,13 @@ const styles = StyleSheet.create({
 //             });
 //           }
 //         }
-//         Alert.alert("Success", "New items added to existing order!");
-//         navigation.navigate("Order Details", { 
-//           bookingId, 
+//         Alert.alert("Success", "Order updated successfully!");
+//         navigation.navigate("Order Details", {
+//           bookingId,
 //           customerId,
-//           customerName, 
+//           customerName,
 //           orderNo: route.params.orderNo || "",
-//          });
+//         });
 //       } else {
 //         navigation.navigate("Order List", {
 //           customerId,
@@ -585,15 +659,12 @@ const styles = StyleSheet.create({
 //         source={
 //           item.image
 //             ? { uri: item.image }
-//             : require("../assets/Images/Placeholder.jpg")
+//             : require("../assets/Images/placeholderItem.png")
 //         }
 //         style={styles.itemImage}
 //       />
-
 //       <View style={styles.itemDetails}>
-//         <Text style={styles.itemName} numberOfLines={1} ellipsizeMode="tail">
-//           {item.name}
-//         </Text>
+//         <Text style={styles.itemName}>{item.name}</Text>
 //         <Text style={styles.itemPrice}>Rs.{item.price}</Text>
 
 //         <View style={styles.bottomRow}>
@@ -618,14 +689,8 @@ const styles = StyleSheet.create({
 //           <TouchableOpacity
 //             style={[
 //               styles.addBtn,
-//               {
-//                 backgroundColor:
-//                   quantity[item.id] && parseInt(quantity[item.id]) > 0
-//                     ? "#2954E5"
-//                     : "#ccc",
-//               },
+//               { display: changedQuantity[item.id] ? "flex" : "none" },
 //             ]}
-//             disabled={!quantity[item.id] || parseInt(quantity[item.id]) <= 0}
 //             onPress={() => handleAddItem(item)}
 //           >
 //             <Text style={styles.addText}>Add</Text>
@@ -639,7 +704,6 @@ const styles = StyleSheet.create({
 //     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
 //       <KeyboardAvoidingView style={{ flex: 1 }}>
 //         <View style={styles.container}>
-//           {/* Customer Info */}
 //           <View style={styles.customerInfo}>
 //             <Text style={styles.customerLabel}>Customer:</Text>
 //             <Text style={styles.customerName}>{customerName}</Text>
@@ -659,9 +723,23 @@ const styles = StyleSheet.create({
 //                 <Search size={22} color="#2954E5" style={styles.searchIcon} />
 //               </TouchableOpacity>
 //             </View>
+
+//             {/* Filter Dropdown - scrollable */}
+//             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+//               {types.map((type) => (
+//                 <TouchableOpacity
+//                   key={type}
+//                   style={[styles.filterBtn, filterType === type && styles.filterBtnActive]}
+//                   onPress={() => handleFilterChange(filterType === type ? "" : type)}
+//                 >
+//                   <Text style={[styles.filterText, filterType === type && styles.filterTextActive]}>
+//                     {type}
+//                   </Text>
+//                 </TouchableOpacity>
+//               ))}
+//             </ScrollView>
 //           </View>
 
-//           {/* Item list */}
 //           <FlatList
 //             data={items}
 //             keyExtractor={(item) => item.id.toString()}
@@ -670,20 +748,19 @@ const styles = StyleSheet.create({
 //             showsVerticalScrollIndicator={false}
 //           />
 
-//           {/* Bottom buttons */}
 //           <View style={styles.bottomButtons}>
 //             <TouchableOpacity
 //               style={[
 //                 styles.proceedBtn,
-//                 { backgroundColor: totalNewItems > 0 ? "#10B981" : "#A7F3D0" },
+//                 { backgroundColor: newItemsToAdd.length > 0 ? "#10B981" : "#A7F3D0" },
 //               ]}
 //               onPress={handleProceed}
-//               disabled={totalNewItems === 0}
+//               disabled={newItemsToAdd.length === 0}
 //             >
 //               <Text style={styles.proceedText}>
 //                 {bookingId
-//                   ? `Add to Order (${totalNewItems} items)`
-//                   : `Proceed (${totalNewItems} items)`}
+//                   ? `Add to Order (${newItemsToAdd.length} items)`
+//                   : `Proceed (${newItemsToAdd.length} items)`}
 //               </Text>
 //             </TouchableOpacity>
 
@@ -700,38 +777,35 @@ const styles = StyleSheet.create({
 // const styles = StyleSheet.create({
 //   safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
 //   container: { flex: 1, padding: 16, paddingBottom: 10 },
+//   customerInfo: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
+//   customerLabel: { fontSize: 15, fontWeight: "600", color: "#555", marginRight: 6 },
+//   customerName: { fontSize: 16, fontWeight: "bold", color: "#2954E5" },
 
-//   customerInfo: {
+//   searchRow: { marginVertical: 10 },
+//   searchContainer: {
 //     flexDirection: "row",
 //     alignItems: "center",
-//     justifyContent: "flex-start",
-//     marginBottom: 6,
-//     paddingHorizontal: 4,
+//     backgroundColor: "#f5f5f5",
+//     borderRadius: 10,
+//     paddingHorizontal: 10,
+//     borderWidth: 1,
+//     borderColor: "#ddd",
 //   },
-//   customerLabel: {
-//     fontSize: 15,
-//     fontWeight: "600",
-//     color: "#555",
+//   searchInput: { flex: 1, height: 40, color: "#000" },
+//   searchIcon: { marginLeft: 8 },
+
+//   filterScroll: { marginTop: 6 },
+//   filterBtn: {
+//     paddingHorizontal: 12,
+//     paddingVertical: 6,
+//     backgroundColor: "#eee",
+//     borderRadius: 20,
 //     marginRight: 6,
+//     marginBottom: 6,
 //   },
-//   customerName: {
-//     fontSize: 16,
-//     fontWeight: "bold",
-//     color: "#2954E5",
-//   },
-
-//   searchRow: { marginVertical: 10 },
-//   searchContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: "#f5f5f5",
-//     borderRadius: 10,
-//     paddingHorizontal: 10,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//   },
-//   searchInput: { flex: 1, height: 40, color: "#000" },
-//   searchIcon: { marginLeft: 8 },
+//   filterBtnActive: { backgroundColor: "#2954E5" },
+//   filterText: { color: "#555" },
+//   filterTextActive: { color: "#fff" },
 
 //   itemContainer: {
 //     flexDirection: "row",
@@ -740,38 +814,18 @@ const styles = StyleSheet.create({
 //     marginBottom: 2,
 //     padding: 12,
 //     borderRadius: 10,
-//     shadowColor: "#000",
-//     shadowOpacity: 0.05,
-//     shadowRadius: 5,
-//     shadowOffset: { width: 0, height: 2 },
 //   },
 //   itemImage: { width: 60, height: 60, borderRadius: 8, marginTop: 4 },
-
-//   itemDetails: {
-//     flex: 1,
-//     marginLeft: 12,
-//   },
+//   itemDetails: { flex: 1, marginLeft: 12 },
 //   itemName: { fontWeight: "bold", fontSize: 16 },
 //   itemPrice: { color: "#555", marginTop: 4 },
 
-//   bottomRow: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent: "flex-end",
-//     marginTop: 8,
-//   },
-//   qtyBox: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: "#f0f0f0",
-//     borderRadius: 8,
-//     marginRight: 8,
-//     paddingHorizontal: 6,
-//   },
+//   bottomRow: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", marginTop: 8 },
+//   qtyBox: { flexDirection: "row", alignItems: "center", backgroundColor: "#f0f0f0", borderRadius: 8, marginRight: 8, paddingHorizontal: 6 },
 //   qtyBtn: { padding: 6 },
 //   qtyInput: { width: 40, textAlign: "center", fontSize: 14, color: "#000" },
 
-//   addBtn: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8 },
+//   addBtn: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8, backgroundColor: "#2954E5" },
 //   addText: { color: "#fff", fontWeight: "bold" },
 
 //   bottomButtons: {
@@ -788,375 +842,6 @@ const styles = StyleSheet.create({
 //   },
 //   proceedBtn: { flex: 0.7, padding: 18, borderRadius: 12, alignItems: "center" },
 //   proceedText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-//   viewAllBtn: {
-//     flex: 0.25,
-//     padding: 18,
-//     borderRadius: 12,
-//     alignItems: "center",
-//     backgroundColor: "#2954E5",
-//   },
-//   viewAllText: { color: "#fff", fontWeight: "600" },
-// });
-
-
-
-
-// import React, { useEffect, useState } from "react";
-// import {
-//   View,
-//   Text,
-//   FlatList,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Image,
-//   Alert,
-//   Platform,
-//   KeyboardAvoidingView,
-// } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import {
-//   initDB,
-//   getItems,
-//   getOrderLineByBookingAndItem,
-//   addOrderBookingLine,
-//   updateOrderBookingLine,
-// } from "../database";
-// import { Search, Plus, Minus } from "lucide-react-native";
-
-// export default function ItemsScreen({ navigation, route }) {
-//   const customerId = route.params.customerId;
-//   const bookingId = route.params.bookingId || null;
-
-//   const [items, setItems] = useState([]);
-//   const [search, setSearch] = useState("");
-//   const [quantity, setQuantity] = useState({});
-//   const [existingOrderItems, setExistingOrderItems] = useState([]);
-//   const [newItemsToAdd, setNewItemsToAdd] = useState([]);
-//   const [totalNewItems, setTotalNewItems] = useState(0);
-
-//   useEffect(() => {
-//     const loadDB = async () => {
-//       await initDB();
-//       fetchItems();
-//       if (bookingId) await loadExistingOrder();
-//     };
-//     loadDB();
-//   }, []);
-
-//   // Load existing order items
-//   const loadExistingOrder = async () => {
-//     const existingOrderList = [];
-//     const allItems = await getItems();
-//     for (const item of allItems) {
-//       const orderLines = await getOrderLineByBookingAndItem(bookingId, item.id);
-//       if (orderLines.length > 0) {
-//         const line = orderLines[0];
-//         existingOrderList.push({
-//           ...item,
-//           quantity: line.order_qty,
-//           total: line.order_qty * item.price,
-//         });
-//       }
-//     }
-//     setExistingOrderItems(existingOrderList);
-//   };
-
-//   const fetchItems = async (query = "") => {
-//     const data = await getItems(query);
-//     setItems(data);
-//   };
-
-//   const handleSearch = (text) => {
-//     setSearch(text);
-//     fetchItems(text);
-//   };
-
-//   const increaseQty = (itemId) => {
-//     const current = parseInt(quantity[itemId] || "0");
-//     setQuantity({ ...quantity, [itemId]: (current + 1).toString() });
-//   };
-
-//   const decreaseQty = (itemId) => {
-//     const current = parseInt(quantity[itemId] || "0");
-//     if (current > 1) {
-//       setQuantity({ ...quantity, [itemId]: (current - 1).toString() });
-//     } else {
-//       setQuantity({ ...quantity, [itemId]: "" });
-//     }
-//   };
-
-//   const handleQuantityChange = (itemId, val) => {
-//     const num = val.replace(/[^0-9]/g, "");
-//     setQuantity({ ...quantity, [itemId]: num });
-//   };
-
-//   const handleAddItem = (item) => {
-//     const qty = parseInt(quantity[item.id] || "0");
-//     if (!qty || qty <= 0) {
-//       Alert.alert("Error", "Please enter a valid quantity");
-//       return;
-//     }
-
-//     const existingIndex = newItemsToAdd.findIndex((o) => o.id === item.id);
-//     let updatedList = [...newItemsToAdd];
-
-//     if (existingIndex !== -1) {
-//       const updatedQty = updatedList[existingIndex].quantity + qty;
-//       updatedList[existingIndex] = {
-//         ...updatedList[existingIndex],
-//         quantity: updatedQty,
-//         total: updatedQty * item.price,
-//       };
-//     } else {
-//       updatedList.push({
-//         ...item,
-//         quantity: qty,
-//         total: qty * item.price,
-//       });
-//     }
-
-//     setNewItemsToAdd(updatedList);
-//     setQuantity({ ...quantity, [item.id]: "" });
-
-//     // Update total new items
-//     const totalQty = updatedList.reduce((sum, i) => sum + i.quantity, 0);
-//     setTotalNewItems(totalQty);
-//   };
-
-//   const handleProceed = async () => {
-//     if (newItemsToAdd.length === 0) {
-//       Alert.alert("Error", "Please add at least one item before proceeding.");
-//       return;
-//     }
-
-//     try {
-//       if (bookingId) {
-//         // Add only new items to existing booking
-//         for (const item of newItemsToAdd) {
-//           const existingLines = await getOrderLineByBookingAndItem(bookingId, item.id);
-//           if (existingLines.length > 0) {
-//             const existingLine = existingLines[0];
-//             const newQty = existingLine.order_qty + item.quantity;
-//             await updateOrderBookingLine(existingLine.line_id, {
-//               order_qty: newQty,
-//               amount: newQty * item.price,
-//             });
-//           } else {
-//             await addOrderBookingLine({
-//               booking_id: bookingId,
-//               item_id: item.id,
-//               order_qty: item.quantity,
-//               unit_price: item.price,
-//               amount: item.total,
-//             });
-//           }
-//         }
-//         Alert.alert("Success", "New items added to existing order!");
-//         navigation.navigate("Order Details", { bookingId, customerId });
-//       } else {
-//         navigation.navigate("Order List", { customerId, orderList: newItemsToAdd });
-//       }
-//     } catch (error) {
-//       console.error(error);
-//       Alert.alert("Error", "Failed to add items");
-//     }
-//   };
-
-//   const handleViewOrders = () => {
-//     navigation.navigate("All Orders", { customerId });
-//   };
-
-//   const renderItem = ({ item }) => (
-//     <View style={styles.itemContainer}>
-//       <Image
-//         source={
-//           item.image
-//             ? { uri: item.image }
-//             : require("../assets/Images/Placeholder.jpg")
-//         }
-//         style={styles.itemImage}
-//       />
-
-//       <View style={styles.itemDetails}>
-//         <Text style={styles.itemName} numberOfLines={1} ellipsizeMode="tail">
-//           {item.name}
-//         </Text>
-//         <Text style={styles.itemPrice}>Rs.{item.price}</Text>
-
-//         <View style={styles.bottomRow}>
-//           <View style={styles.qtyBox}>
-//             <TouchableOpacity onPress={() => decreaseQty(item.id)} style={styles.qtyBtn}>
-//               <Minus size={16} color="#000" />
-//             </TouchableOpacity>
-
-//             <TextInput
-//               placeholder="0"
-//               keyboardType="number-pad"
-//               style={styles.qtyInput}
-//               value={quantity[item.id] ? quantity[item.id].toString() : ""}
-//               onChangeText={(val) => handleQuantityChange(item.id, val)}
-//             />
-
-//             <TouchableOpacity onPress={() => increaseQty(item.id)} style={styles.qtyBtn}>
-//               <Plus size={16} color="#000" />
-//             </TouchableOpacity>
-//           </View>
-
-//           <TouchableOpacity
-//             style={[
-//               styles.addBtn,
-//               {
-//                 backgroundColor:
-//                   quantity[item.id] && parseInt(quantity[item.id]) > 0 ? "#2954E5" : "#ccc",
-//               },
-//             ]}
-//             disabled={!quantity[item.id] || parseInt(quantity[item.id]) <= 0}
-//             onPress={() => handleAddItem(item)}
-//           >
-//             <Text style={styles.addText}>Add</Text>
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-//     </View>
-//   );
-
-//   return (
-//     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
-//       <KeyboardAvoidingView
-//         style={{ flex: 1 }}
-//       >
-//         <View style={styles.container}>
-//           {/* Search */}
-//           <View style={styles.searchRow}>
-//             <View style={styles.searchContainer}>
-//               <TextInput
-//                 placeholder="Search items..."
-//                 value={search}
-//                 onChangeText={handleSearch}
-//                 style={styles.searchInput}
-//                 placeholderTextColor="#888"
-//               />
-//               <TouchableOpacity onPress={() => handleSearch(search)}>
-//                 <Search size={22} color="#2954E5" style={styles.searchIcon} />
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-
-//           {/* Item list */}
-//           <FlatList
-//             data={items}
-//             keyExtractor={(item) => item.id.toString()}
-//             renderItem={renderItem}
-//             contentContainerStyle={{ paddingBottom: 62 }}
-//             showsVerticalScrollIndicator={false}
-//           />
-
-//           {/* Bottom buttons */}
-//           <View style={styles.bottomButtons}>
-//             <TouchableOpacity
-//               style={[
-//                 styles.proceedBtn,
-//                 { backgroundColor: totalNewItems > 0 ? "#10B981" : "#A7F3D0" },
-//               ]}
-//               onPress={handleProceed}
-//               disabled={totalNewItems === 0}
-//             >
-//               <Text style={styles.proceedText}>
-//                 {bookingId
-//                   ? `Add to Order (${totalNewItems} items)`
-//                   : `Proceed (${totalNewItems} items)`}
-//               </Text>
-//             </TouchableOpacity>
-
-//             <TouchableOpacity style={styles.viewAllBtn} onPress={handleViewOrders}>
-//               <Text style={styles.viewAllText}>View All</Text>
-//             </TouchableOpacity>
-//           </View>
-//         </View>
-//       </KeyboardAvoidingView>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   safeArea: { flex: 1, backgroundColor: "#f0f2f5" },
-//   container: { flex: 1, padding: 16, paddingBottom: 10 },
-
-//   searchRow: { marginVertical: 10 },
-//   searchContainer: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: "#f5f5f5",
-//     borderRadius: 10,
-//     paddingHorizontal: 10,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//   },
-//   searchInput: { flex: 1, height: 40, color: "#000" },
-//   searchIcon: { marginLeft: 8 },
-
-//   itemContainer: {
-//     flexDirection: "row",
-//     alignItems: "flex-start",
-//     backgroundColor: "#fff",
-//     marginBottom: 2,
-//     padding: 12,
-//     borderRadius: 10,
-//     shadowColor: "#000",
-//     shadowOpacity: 0.05,
-//     shadowRadius: 5,
-//     shadowOffset: { width: 0, height: 2 },
-//   },
-//   itemImage: { width: 60, height: 60, borderRadius: 8, marginTop: 4 },
-
-//   itemDetails: {
-//     flex: 1,
-//     marginLeft: 12,
-//   },
-//   itemName: { fontWeight: "bold", fontSize: 16 },
-//   itemPrice: { color: "#555", marginTop: 4 },
-
-//   bottomRow: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     justifyContent:"flex-end",
-//     marginTop: 8,
-//   },
-//   qtyBox: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     backgroundColor: "#f0f0f0",
-//     borderRadius: 8,
-//     marginRight: 8,
-//     paddingHorizontal: 6,
-//   },
-//   qtyBtn: { padding: 6 },
-//   qtyInput: { width: 40, textAlign: "center", fontSize: 14, color: "#000" },
-
-//   addBtn: { paddingVertical: 8, paddingHorizontal: 16, borderRadius: 8 },
-//   addText: { color: "#fff", fontWeight: "bold" },
-
-//   bottomButtons: {
-//     position: "absolute",
-//     bottom: 0,
-//     left: 0,
-//     right: 0,
-//     flexDirection: "row",
-//     justifyContent: "space-between",
-//     padding: 6,
-//     backgroundColor: "#fff",
-//     borderTopWidth: 1,
-//     borderColor: "#ddd",
-//   },
-//   proceedBtn: { flex: 0.7, padding: 18, borderRadius: 12, alignItems: "center" },
-//   proceedText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-//   viewAllBtn: {
-//     flex: 0.25,
-//     padding: 18,
-//     borderRadius: 12,
-//     alignItems: "center",
-//     backgroundColor: "#2954E5",
-//   },
+//   viewAllBtn: { flex: 0.25, padding: 18, borderRadius: 12, alignItems: "center", backgroundColor: "#2954E5" },
 //   viewAllText: { color: "#fff", fontWeight: "600" },
 // });

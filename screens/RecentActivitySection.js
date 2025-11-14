@@ -1,40 +1,50 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { getRecentActivities } from "../database";
+import { getAllOrders } from "../database"; // fetch all orders
 
 export default function RecentActivitySection() {
-  const [activities, setActivities] = useState([]);
+  const [orders, setOrders] = useState([]);
   const navigation = useNavigation();
   const { width } = Dimensions.get("window");
 
-  const fetchActivities = async () => {
+  const fetchOrders = async () => {
     try {
-      const data = await getRecentActivities();
-      const mappedData = data.map((item) => ({
-        id: item.id,
-        orderNo: item.booking_id,
-        customerName: item.customer_name, // Make sure your DB returns this
-        desc: `${item.item_count} items purchased,\nTotal Rs.${item.total_amount?.toFixed(2) ?? 0}`,
-        date: item.activity_date ? new Date(item.activity_date).toLocaleDateString() : "",
-        day: item.activity_date ? new Date(item.activity_date).toLocaleDateString("en-US", { weekday: "short" }) : "",
-        bg: "#D9F7E5",
-        icon: (
-          <Image
-            source={require("../assets/Icons/LeadStatus.png")}
-            style={styles.icon}
-          />
-        ),
-      }));
-      setActivities(mappedData.reverse().slice(0, 3)); // latest 4
+      const data = await getAllOrders();
+      if (data && data.length > 0) {
+        // sort by newest first (assuming booking_id increments)
+        const sortedData = data.sort((a, b) => b.booking_id - a.booking_id);
+        const latestThree = sortedData.slice(0, 3); // last 3 orders
+
+        const mappedData = latestThree.map((item) => ({
+          id: item.booking_id,
+          orderNo: item.order_no,
+          customerName: item.customer_name,
+          desc: `${item.item_count} items purchased,\nTotal Rs.${item.total_amount?.toFixed(2) ?? 0}`,
+          date: item.order_date ? new Date(item.order_date).toLocaleDateString() : "",
+          day: item.order_date ? new Date(item.order_date).toLocaleDateString("en-US", { weekday: "short" }) : "",
+          bg: "#D9F7E5",
+          icon: (
+            <Image
+              source={require("../assets/Icons/LeadStatus.png")}
+              style={styles.icon}
+            />
+          ),
+        }));
+
+        setOrders(mappedData);
+      } else {
+        setOrders([]);
+      }
     } catch (error) {
-      console.error("Error fetching recent activities:", error);
+      console.error("Error fetching orders:", error);
     }
   };
 
+  // Fetch latest orders every time screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchActivities();
+      fetchOrders();
     }, [])
   );
 
@@ -54,15 +64,14 @@ export default function RecentActivitySection() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContainer}
       >
-        {activities.length > 0 ? (
-          activities.map((item) => (
+        {orders.length > 0 ? (
+          orders.map((item) => (
             <TouchableOpacity
               key={item.id}
               style={[styles.card, { width: width - 30 }]}
               onPress={() =>
                 navigation.navigate("Order Details", {
-                  bookingId: item.orderNo,
-                  customerId: item.id, // Use actual customer ID from DB if available
+                  bookingId: item.id,
                   customerName: item.customerName,
                 })
               }
@@ -100,7 +109,6 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: "#2D99FF",
     paddingBottom: 20,
-    marginBottom: 50,
   },
   header: {
     flexDirection: "row",
@@ -147,17 +155,12 @@ const styles = StyleSheet.create({
   orderNo: { fontSize: 12, fontWeight: "500", color: "#888", marginBottom: 2 },
   cardTitle: { fontSize: 16, fontWeight: "600", color: "#000" },
   cardDesc: { fontSize: 12, color: "#666", marginTop: 2 },
-  dateContainer: { alignItems: "flex-end", gap: 20 },
+  dateContainer: { alignItems: "flex-end", gap: 10,marginTop:16 },
   date: { fontSize: 12, color: "gray", fontWeight: "600" },
   day: { fontSize: 11, color: "#888" },
   icon: { width: 26, height: 26, resizeMode: "contain" },
   emptyText: { textAlign: "center", color: "#fff", marginTop: 10, fontSize: 14 },
 });
-
-
-
-
-
 
 
 
@@ -176,8 +179,9 @@ const styles = StyleSheet.create({
 //       const data = await getRecentActivities();
 //       const mappedData = data.map((item) => ({
 //         id: item.id,
-//         title: `Order #${item.booking_id}`,
-//         desc: `${item.item_count} items purchased, Total Rs.${item.total_amount?.toFixed(2) ?? 0}`,
+//         orderNo: item.booking_id,
+//         customerName: item.customer_name, // Make sure your DB returns this
+//         desc: `${item.item_count} items purchased,\nTotal Rs.${item.total_amount?.toFixed(2) ?? 0}`,
 //         date: item.activity_date ? new Date(item.activity_date).toLocaleDateString() : "",
 //         day: item.activity_date ? new Date(item.activity_date).toLocaleDateString("en-US", { weekday: "short" }) : "",
 //         bg: "#D9F7E5",
@@ -188,7 +192,7 @@ const styles = StyleSheet.create({
 //           />
 //         ),
 //       }));
-//       setActivities(mappedData.reverse().slice(0, 4)); // latest 4
+//       setActivities(mappedData.reverse().slice(0, 3)); // latest 4
 //     } catch (error) {
 //       console.error("Error fetching recent activities:", error);
 //     }
@@ -206,7 +210,7 @@ const styles = StyleSheet.create({
 //         <Text style={styles.title}>Recent Activity</Text>
 //         <TouchableOpacity
 //           style={styles.seeMoreButton}
-//           onPress={() => navigation.navigate("Recent Activities")}
+//           onPress={() => navigation.navigate("All Orders")}
 //         >
 //           <Text style={styles.seeMoreText}>See more</Text>
 //         </TouchableOpacity>
@@ -218,23 +222,36 @@ const styles = StyleSheet.create({
 //       >
 //         {activities.length > 0 ? (
 //           activities.map((item) => (
-//             <View key={item.id} style={[styles.card, { width: width - 30 }]}>
+//             <TouchableOpacity
+//               key={item.id}
+//               style={[styles.card, { width: width - 30 }]}
+//               onPress={() =>
+//                 navigation.navigate("Order Details", {
+//                   bookingId: item.orderNo,
+//                   customerId: item.id, // Use actual customer ID from DB if available
+//                   customerName: item.customerName,
+//                 })
+//               }
+//             >
 //               <View style={[styles.iconContainer, { backgroundColor: item.bg }]}>
 //                 {item.icon}
 //               </View>
+
 //               <View style={styles.textContainer}>
+//                 <Text style={styles.orderNo}>Order #{item.orderNo}</Text>
 //                 <Text style={styles.cardTitle} numberOfLines={1}>
-//                   {item.title}
+//                   {item.customerName}
 //                 </Text>
 //                 <Text style={styles.cardDesc} numberOfLines={2}>
 //                   {item.desc}
 //                 </Text>
 //               </View>
+
 //               <View style={styles.dateContainer}>
 //                 <Text style={styles.date}>{item.date}</Text>
 //                 <Text style={styles.day}>{item.day}</Text>
 //               </View>
-//             </View>
+//             </TouchableOpacity>
 //           ))
 //         ) : (
 //           <Text style={styles.emptyText}>No recent activity yet.</Text>
@@ -249,6 +266,7 @@ const styles = StyleSheet.create({
 //     padding: 15,
 //     backgroundColor: "#2D99FF",
 //     paddingBottom: 20,
+//     marginBottom: 50,
 //   },
 //   header: {
 //     flexDirection: "row",
@@ -292,9 +310,10 @@ const styles = StyleSheet.create({
 //     flex: 1,
 //     marginLeft: 12,
 //   },
+//   orderNo: { fontSize: 12, fontWeight: "500", color: "#888", marginBottom: 2 },
 //   cardTitle: { fontSize: 16, fontWeight: "600", color: "#000" },
-//   cardDesc: { fontSize: 10, color: "#666", marginTop: 2 },
-//   dateContainer: { alignItems: "flex-end",gap:10 },
+//   cardDesc: { fontSize: 12, color: "#666", marginTop: 2 },
+//   dateContainer: { alignItems: "flex-end", gap: 20 },
 //   date: { fontSize: 12, color: "gray", fontWeight: "600" },
 //   day: { fontSize: 11, color: "#888" },
 //   icon: { width: 26, height: 26, resizeMode: "contain" },

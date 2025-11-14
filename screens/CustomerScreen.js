@@ -100,12 +100,12 @@ export default function CustomerScreen({ navigation }) {
           <Text style={styles.name}>{item.name}</Text>
         </View>
         <Text style={styles.phone}>📞 {item.phone}</Text>
-        <Text style={styles.lastSeen}>Last seen: {item.last_seen}</Text>
+        <Text style={styles.lastSeen}>Last Visit: {item.last_seen}</Text>
       </View>
 
       <View style={styles.iconContainer}>
         <TouchableOpacity
-          onPress={() => toggleVisited(item.entity_id, item.visited)}
+          onPress={() => toggleVisited()}
         >
           <View
             style={[
@@ -359,7 +359,13 @@ const styles = StyleSheet.create({
 //   StyleSheet,
 //   TouchableOpacity,
 // } from "react-native";
-// import { initDB, getAllCustomers, searchCustomers, updateVisited } from "../database";
+// import {
+//   initDB,
+//   getAllCustomers,
+//   searchCustomers,
+//   updateVisited,
+//   updateCustomerLastSeen,
+// } from "../database"; // ✅ added function to update last_seen
 // import { Feather } from "@expo/vector-icons";
 // import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -372,6 +378,7 @@ const styles = StyleSheet.create({
 // export default function CustomerScreen({ navigation }) {
 //   const [customers, setCustomers] = useState([]);
 //   const [search, setSearch] = useState("");
+//   const [filter, setFilter] = useState("all");
 
 //   useEffect(() => {
 //     const loadDB = async () => {
@@ -383,27 +390,48 @@ const styles = StyleSheet.create({
 
 //   const fetchCustomers = async () => {
 //     const data = await getAllCustomers();
-//     setCustomers(data);
+//     applyFilter(data);
+//   };
+
+//   const applyFilter = (data) => {
+//     let filtered = [...data];
+//     if (filter === "visited") filtered = data.filter((i) => i.visited === "Visited");
+//     else if (filter === "notVisited") filtered = data.filter((i) => i.visited === "Unvisited");
+//     setCustomers(filtered);
+//   };
+
+//   const handleFilterChange = async (type) => {
+//     setFilter(type);
+//     const all = await getAllCustomers();
+//     let filtered = [...all];
+//     if (type === "visited") filtered = all.filter((i) => i.visited === "Visited");
+//     else if (type === "notVisited") filtered = all.filter((i) => i.visited === "Unvisited");
+//     setCustomers(filtered);
 //   };
 
 //   const handleSearch = async (text) => {
 //     setSearch(text);
-//     if (text.trim() === "") {
-//       fetchCustomers();
-//     } else {
+//     if (text.trim() === "") fetchCustomers();
+//     else {
 //       const data = await searchCustomers(text);
-//       setCustomers(data);
+//       applyFilter(data);
 //     }
 //   };
 
+//   // ✅ toggle visited and update last_seen
 //   const toggleVisited = async (id, visited) => {
-//     await updateVisited(id, visited ? 0 : 1);
+//     const newStatus = visited === "Visited" ? "Unvisited" : "Visited";
+//     const now = new Date().toISOString();
+//     await updateVisited(id, newStatus);          // update visited status
+//     await updateCustomerLastSeen(id, now);       // update last_seen timestamp
 //     fetchCustomers();
 //   };
 
 //   const handleCustomerPress = (customer) => {
-//     // Navigate to ItemsScreen and pass the selected customer's ID
-//     navigation.navigate("Items", { customerId: customer.entity_id, customerName: customer.name });
+//     navigation.navigate("Items", {
+//       customerId: customer.entity_id,
+//       customerName: customer.name,
+//     });
 //   };
 
 //   const renderItem = ({ item }) => (
@@ -411,90 +439,140 @@ const styles = StyleSheet.create({
 //       style={styles.itemContainer}
 //       onPress={() => handleCustomerPress(item)}
 //     >
-//       {/* Letter Avatar */}
 //       <View
 //         style={[styles.avatar, { backgroundColor: getAvatarColor(item.name) }]}
 //       >
-//         <Text style={styles.avatarText}>{item.name.charAt(0).toUpperCase()}</Text>
+//         <Text style={styles.avatarText}>
+//           {item.name.charAt(0).toUpperCase()}
+//         </Text>
 //       </View>
 
 //       <View style={styles.infoContainer}>
-        
 //         <View style={styles.nameRow}>
 //           <Text style={styles.name}>{item.name}</Text>
-//          <TouchableOpacity onPress={() => toggleVisited(item.entity_id, item.visited)}>
-//   <View
-//     style={[
-//       styles.visitedBox,
-//       {
-//         backgroundColor: item.visited ? "green" : "transparent",
-//         borderWidth: 1,
-//         borderColor: item.visited ? "green" : "#555",
-//       },
-//     ]}
-//   >
-//     <Text style={[styles.tick, { color: item.visited ? "#fff" : "#555" }]}>
-//       ✓
-//     </Text>
-//   </View>
-// </TouchableOpacity>
-
 //         </View>
-
-//         {/* Phone and Last Seen */}
 //         <Text style={styles.phone}>📞 {item.phone}</Text>
-//         <Text style={styles.lastSeen}>Last seen: {item.last_seen}</Text>
+//         <Text style={styles.lastSeen}>Last Visit: {item.last_seen}</Text>
+//       </View>
+
+//       <View style={styles.iconContainer}>
+//         <TouchableOpacity
+//           onPress={() => toggleVisited(item.entity_id, item.visited)}
+//         >
+//           <View
+//             style={[
+//               styles.visitedBox,
+//               {
+//                 backgroundColor: item.visited === "Visited" ? "green" : "transparent",
+//                 borderColor: item.visited === "Visited" ? "green" : "#888",
+//               },
+//             ]}
+//           >
+//             <Text
+//               style={[
+//                 styles.tick,
+//                 { color: item.visited === "Visited" ? "#fff" : "#666" },
+//               ]}
+//             >
+//               ✓
+//             </Text>
+//           </View>
+//         </TouchableOpacity>
+
+//         <TouchableOpacity
+//           onPress={() =>
+//             navigation.navigate("Live Tracking", {
+//               customer: {
+//                 id: item.entity_id,
+//                 name: item.name,
+//                 latitude: item.latitude,
+//                 longitude: item.longitude,
+//                 visited: item.visited,
+//               },
+//             })
+//           }
+//         >
+//           <Feather
+//             name="map-pin"
+//             size={20}
+//             color="#007bff"
+//             style={{ marginTop: 6 }}
+//           />
+//         </TouchableOpacity>
 //       </View>
 //     </TouchableOpacity>
 //   );
 
 //   return (
 //     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
-//     <View style={styles.container}>
-//       {/* Search Bar with Add Button */}
-//       <View style={styles.searchRow}>
-//         <View style={styles.searchContainer}>
-//           <TextInput
-//             style={styles.searchBar}
-//             placeholder="Search Customer..."
-//             value={search}
-//             onChangeText={handleSearch}
-//           />
-//           <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
+//       <View style={styles.container}>
+//         {/* 🔍 Search Bar */}
+//         <View style={styles.searchRow}>
+//           <View style={styles.searchContainer}>
+//             <TextInput
+//               style={styles.searchBar}
+//               placeholder="Search Customer..."
+//               value={search}
+//               onChangeText={handleSearch}
+//             />
+//             <Feather name="search" size={20} color="#888" style={styles.searchIcon} />
+//           </View>
 //         </View>
 
-//         {/* <TouchableOpacity
-//           style={styles.addButton}
-//           onPress={() => navigation.navigate("AddCustomer")}
-//         >
-//           <Feather name="plus" size={28} color="blue" />
-//         </TouchableOpacity> */}
-//       </View>
+//         {/* 🔘 Compact Filter Buttons */}
+//         <View style={styles.filterContainer}>
+//           {["all", "visited", "notVisited"].map((type, index) => (
+//             <TouchableOpacity
+//               key={type}
+//               style={[
+//                 styles.filterButton,
+//                 filter === type && styles.activeFilter,
+//                 index === 0 && styles.leftButton,
+//                 index === 2 && styles.rightButton,
+//               ]}
+//               onPress={() => handleFilterChange(type)}
+//             >
+//               <Text
+//                 style={[
+//                   styles.filterText,
+//                   filter === type && styles.activeFilterText,
+//                 ]}
+//               >
+//                 {type === "all"
+//                   ? "All"
+//                   : type === "visited"
+//                   ? "Visited"
+//                   : "Not Visited"}
+//               </Text>
+//             </TouchableOpacity>
+//           ))}
+//         </View>
 
-//       {/* Customer List */}
-//       <FlatList
-//         data={customers}
-//         keyExtractor={(item) => item.entity_id.toString()}
-//         renderItem={renderItem}
-//         showsVerticalScrollIndicator={false}
-//       />
-//     </View>
+//         {/* 👥 Customer List */}
+//         <FlatList
+//           data={customers}
+//           keyExtractor={(item) => item.entity_id.toString()}
+//           renderItem={renderItem}
+//           showsVerticalScrollIndicator={false}
+//         />
+//       </View>
 //     </SafeAreaView>
 //   );
 // }
 
 // const styles = StyleSheet.create({
-//     safeArea: { flex: 1, backgroundColor: "#f9fafb" },
+//   safeArea: { flex: 1, backgroundColor: "#f9fafb" },
 //   container: {
 //     flex: 1,
 //     paddingTop: 10,
-//     paddingHorizontal:10,
+//     paddingHorizontal: 10,
 //     backgroundColor: "#fff",
 //   },
+
 //   searchRow: {
 //     flexDirection: "row",
 //     alignItems: "center",
-//     marginBottom: 10,
+//     marginBottom: 8,
 //   },
 //   searchContainer: {
 //     flex: 1,
@@ -513,14 +591,46 @@ const styles = StyleSheet.create({
 //   searchIcon: {
 //     marginLeft: 10,
 //   },
-//   addButton: {
-//     marginLeft: 10,
-//     padding: 4,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: "#f1f1f9",
-//     borderRadius: 10,
+
+//   // ✅ Compact Filter Layout
+//   filterContainer: {
+//     flexDirection: "row",
+//     marginBottom: 6,
+//     borderWidth: 1,
+//     borderColor: "#ccc",
+//     borderRadius: 2,
+//     overflow: "hidden",
 //   },
+//   filterButton: {
+//     flex: 1,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     paddingVertical: 10,
+//     backgroundColor: "#f8f9fa",
+//     borderRightWidth: 1,
+//     borderColor: "#ccc",
+//   },
+//   leftButton: {
+//     borderTopLeftRadius: 2,
+//     borderBottomLeftRadius: 2,
+//   },
+//   rightButton: {
+//     borderTopRightRadius: 2,
+//     borderBottomRightRadius: 2,
+//     borderRightWidth: 0,
+//   },
+//   filterText: {
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: "#444",
+//   },
+//   activeFilter: {
+//     backgroundColor: "#007bff",
+//   },
+//   activeFilterText: {
+//     color: "#fff",
+//   },
+
 //   itemContainer: {
 //     flexDirection: "row",
 //     padding: 10,
@@ -545,9 +655,7 @@ const styles = StyleSheet.create({
 //     color: "#fff",
 //     fontWeight: "bold",
 //   },
-//   infoContainer: {
-//     flex: 1,
-//   },
+//   infoContainer: { flex: 1 },
 //   nameRow: {
 //     flexDirection: "row",
 //     justifyContent: "space-between",
@@ -566,24 +674,21 @@ const styles = StyleSheet.create({
 //     fontSize: 12,
 //     marginTop: 2,
 //   },
-//   visited: {
-//      width: 24,
+//   iconContainer: {
+//     alignItems: "center",
+//     gap: 10,
+//   },
+//   visitedBox: {
+//     width: 24,
 //     height: 24,
 //     borderRadius: 4,
 //     justifyContent: "center",
 //     alignItems: "center",
+//     borderWidth: 1,
 //   },
-//   visitedBox: {
-//   width: 24,
-//   height: 24,
-//   borderRadius: 4,
-//   justifyContent: "center",
-//   alignItems: "center",
-// },
-// tick: {
-//   fontWeight: "bold",
-//   fontSize: 16,
-//   textAlign: "center",
-// },
-
+//   tick: {
+//     fontWeight: "bold",
+//     fontSize: 16,
+//     textAlign: "center",
+//   },
 // });

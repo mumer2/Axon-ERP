@@ -26,7 +26,8 @@ export const initDB = async () => {
       name TEXT NOT NULL,
       price REAL NOT NULL,
       type TEXT DEFAULT '',
-      image TEXT DEFAULT ''
+      image TEXT DEFAULT '',
+      stock INTEGER DEFAULT 0
     );
   `);
 
@@ -121,46 +122,46 @@ const existingItems = await db.getAllAsync(
 );
 if (existingItems?.[0]?.count === 0) {
   await db.runAsync(`
-    INSERT INTO items (name, price, type, image) VALUES
-    -- 🧵 Clothing & Textiles
-    ('Cotton Fabric Roll', 1200, 'Clothing', ''),
-    ('Polyester Yarn', 850, 'Clothing', ''),
-    ('Silk Dupatta', 500, 'Clothing', ''),
-    ('Denim Jeans', 2200, 'Clothing', ''),
-    ('Formal Shirt', 2100, 'Clothing', ''),
-    ('T-Shirt Pack', 1500, 'Clothing', ''),
-    ('Winter Jacket', 4500, 'Clothing', ''),
+  INSERT INTO items (name, price, type, image, stock) VALUES
+  -- 🧵 Clothing & Textiles
+  ('Cotton Fabric Roll', 1200, 'Clothing', 'https://images.pexels.com/photos/4502351/pexels-photo-4502351.jpeg', 50),
+  ('Polyester Yarn', 850, 'Clothing', 'https://images.pexels.com/photos/1105583/pexels-photo-1105583.jpeg', 100),
+  ('Silk Dupatta', 500, 'Clothing', 'https://images.pexels.com/photos/1435908/pexels-photo-1435908.jpeg', 30),
+  ('Denim Jeans', 2200, 'Clothing', 'https://images.pexels.com/photos/2983464/pexels-photo-2983464.jpeg', 40),
+  ('Formal Shirt', 2100, 'Clothing', 'https://images.pexels.com/photos/2983463/pexels-photo-2983463.jpeg', 60),
+  ('T‑Shirt Pack', 1500, 'Clothing', 'https://images.pexels.com/photos/845434/pexels-photo-845434.jpeg', 80),
+  ('Winter Jacket', 4500, 'Clothing', 'https://images.pexels.com/photos/428338/pexels-photo-428338.jpeg', 25),
 
-    -- 🛒 Groceries
-    ('Basmati Rice 5kg', 1700, 'Grocery', ''),
-    ('Cooking Oil 1L', 620, 'Grocery', ''),
-    ('Sugar 1kg', 180, 'Grocery', ''),
-    ('Wheat Flour 10kg', 1650, 'Grocery', ''),
-    ('Tea Pack 250g', 450, 'Grocery', ''),
-    ('Milk Carton 1L', 270, 'Grocery', ''),
-    ('Eggs (Dozen)', 320, 'Grocery', ''),
+  -- 🛒 Groceries
+  ('Basmati Rice 5kg', 1700, 'Grocery', 'https://greenvalley.pk/wp-content/uploads/2024/01/guard-ultimate-basmati-rice-5kg.jpg', 200),
+  ('Cooking Oil 1L', 620, 'Grocery', 'https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg', 150),
+  ('Sugar 1kg', 180, 'Grocery', 'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg', 180),
+  ('Wheat Flour 10kg', 1650, 'Grocery', 'https://images.pexels.com/photos/461428/pexels-photo-461428.jpeg', 120),
+  ('Tea Pack 250g', 450, 'Grocery', 'https://images.pexels.com/photos/54524/tea-cup-tea-packet.jpg', 300),
+  ('Milk Carton 1L', 270, 'Grocery', 'https://images.pexels.com/photos/5539924/pexels-photo-5539924.jpeg', 250),
+  ('Eggs (Dozen)', 320, 'Grocery', 'https://images.pexels.com/photos/65175/eggs-carton.jpg', 180),
 
-    -- 🧴 Household & Cleaning
-    ('Washing Powder 1kg', 480, 'Household', ''),
-    ('Dishwashing Liquid 500ml', 350, 'Household', ''),
-    ('Bath Soap 3-Pack', 250, 'Household', ''),
-    ('Shampoo 400ml', 600, 'Household', ''),
-    ('Toothpaste 150g', 200, 'Household', ''),
+  -- 🧴 Household & Cleaning
+  ('Washing Powder 1kg', 480, 'Household', 'https://images.pexels.com/photos/3951275/pexels-photo-3951275.jpeg', 100),
+  ('Dishwashing Liquid 500ml', 350, 'Household', 'https://images.pexels.com/photos/374887/pexels-photo-374887.jpeg', 120),
+  ('Bath Soap 3‑Pack', 250, 'Household', 'https://images.pexels.com/photos/301920/pexels-photo-301920.jpeg', 150),
+  ('Shampoo 400ml', 600, 'Household', 'https://images.pexels.com/photos/356854/pexels-photo-356854.jpeg', 90),
+  ('Toothpaste 150g', 200, 'Household', 'https://images.pexels.com/photos/3965669/pexels-photo-3965669.jpeg', 200),
 
-    -- 💻 Electronics
-    ('LED Bulb 12W', 350, 'Electronics', ''),
-    ('Power Bank 10000mAh', 2800, 'Electronics', ''),
-    ('Bluetooth Earbuds', 4200, 'Electronics', ''),
-    ('USB Cable Type-C', 350, 'Electronics', ''),
-    ('Mobile Charger', 950, 'Electronics', ''),
+  -- 💻 Electronics
+  ('LED Bulb 12W', 350, 'Electronics', 'https://images.pexels.com/photos/5082573/pexels-photo-5082573.jpeg', 80),
+  ('Power Bank 10000mAh', 2800, 'Electronics', 'https://images.pexels.com/photos/574542/pexels-photo-574542.jpeg', 50),
+  ('Bluetooth Earbuds', 4200, 'Electronics', 'https://images.pexels.com/photos/373945/pexels-photo-373945.jpeg', 40),
+  ('USB Cable Type‑C', 350, 'Electronics', 'https://images.pexels.com/photos/5082572/pexels-photo-5082572.jpeg', 100),
+  ('Mobile Charger', 950, 'Electronics', 'https://images.pexels.com/photos/404280/pexels-photo-404280.jpeg', 70),
 
-    -- 🏠 Home & Kitchen
-    ('Plastic Chair', 1200, 'Home & Kitchen', ''),
-    ('Stainless Steel Pan', 2100, 'Home & Kitchen', ''),
-    ('Curtain Set', 2500, 'Home & Kitchen', ''),
-    ('Wall Clock', 1450, 'Home & Kitchen', ''),
-    ('Floor Mat', 850, 'Home & Kitchen', '')
-  `);
+  -- 🏠 Home & Kitchen
+  ('Plastic Chair', 1200, 'Home & Kitchen', 'https://images.pexels.com/photos/276528/pexels-photo-276528.jpeg', 60),
+  ('Stainless Steel Pan', 2100, 'Home & Kitchen', 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg', 40),
+  ('Curtain Set', 2500, 'Home & Kitchen', 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg', 30),
+  ('Wall Clock', 1450, 'Home & Kitchen', 'https://images.pexels.com/photos/357338/pexels-photo-357338.jpeg', 50),
+  ('Floor Mat', 850, 'Home & Kitchen', 'https://images.pexels.com/photos/290615/pexels-photo-290615.jpeg', 70)
+`);
 }
 
 
@@ -263,11 +264,12 @@ export const getItems = async (query = "") => {
   );
 };
 
-export const addItem = async (name, price, image = "") => {
-  await db.runAsync("INSERT INTO items (name, price, image) VALUES (?, ?, ?)", [
+export const addItem = async (name, price, image, stock = "") => {
+  await db.runAsync("INSERT INTO items (name, price, image, stock) VALUES (?, ?, ?, ?)", [
     name,
     price,
     image,
+    stock,
   ]);
 };
 
@@ -512,6 +514,24 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
   );
 };
 
+// Fetch orders for a specific customer with summary info
+export const getOrdersByCustomer = async (customerId) => {
+  return await db.getAllAsync(`
+    SELECT 
+      ob.booking_id, 
+      ob.order_no, 
+      ob.order_date, 
+      c.name AS customer_name,
+      COUNT(obl.line_id) AS item_count,
+      SUM(obl.amount) AS total_amount
+    FROM order_booking ob
+    LEFT JOIN customer c ON ob.customer_id = c.entity_id
+    LEFT JOIN order_booking_line obl ON ob.booking_id = obl.booking_id
+    WHERE ob.customer_id = ?
+    GROUP BY ob.booking_id
+    ORDER BY ob.booking_id DESC;
+  `, [customerId]);
+};
 
 
 
@@ -533,9 +553,10 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 //       name TEXT NOT NULL,
 //       phone TEXT,
 //       last_seen TEXT,
-//       visited BOOLEAN DEFAULT 0,
+//       visited TEXT DEFAULT 'Unvisited',
 //       latitude REAL,
-//       longitude REAL
+//       longitude REAL,
+//       location_status TEXT DEFAULT 'Not Updated'
 //     );
 //   `);
 
@@ -545,7 +566,9 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 //       id INTEGER PRIMARY KEY AUTOINCREMENT,
 //       name TEXT NOT NULL,
 //       price REAL NOT NULL,
-//       image TEXT DEFAULT ''
+//       type TEXT DEFAULT '',
+//       image TEXT DEFAULT '',
+//       stock INTEGER DEFAULT 0
 //     );
 //   `);
 
@@ -576,84 +599,115 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 //     );
 //   `);
 
+//   // Activity Log Table (daily status)
+//   await db.execAsync(`
+//     CREATE TABLE IF NOT EXISTS activity_log (
+//       id INTEGER PRIMARY KEY AUTOINCREMENT,
+//       customer_id INTEGER NOT NULL,
+//       customer_name TEXT NOT NULL,
+//       date TEXT NOT NULL,
+//       status TEXT DEFAULT 'Unvisited',
+//       FOREIGN KEY (customer_id) REFERENCES customer(entity_id)
+//     );
+//   `);
+
+
+//   // Customer Receipts Table
+// await db.execAsync(`
+//   CREATE TABLE IF NOT EXISTS customerReceipts (
+//     id INTEGER PRIMARY KEY AUTOINCREMENT,
+//     customer_id INTEGER NOT NULL,
+//     cash_bank_id TEXT NOT NULL,
+//     amount REAL NOT NULL,
+//     note TEXT,
+//     attachment TEXT,
+//     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+//     FOREIGN KEY (customer_id) REFERENCES customer(entity_id)
+//   );
+// `);
+
+
 //   // Insert dummy customers if empty
 //   const existingCustomers = await db.getAllAsync(
 //     "SELECT COUNT(*) as count FROM customer"
 //   );
 //   if (existingCustomers?.[0]?.count === 0) {
 //     await db.runAsync(`
-//       INSERT INTO customer (name, phone, last_seen, visited, latitude, longitude) VALUES
-//   ('Ali Raza', '03001234567', '2025-11-06 10:00', 1, 31.4182, 73.0791),
-//   ('Ayesha Khan', '03019876543', '2025-11-05 18:30', 0, 31.4220, 73.0954),
-//   ('Hassan Ahmed', '03025557788', '2025-11-06 09:15', 1, 31.4068, 73.1015),
-//   ('Fatima Tariq', '03037778899', '2025-11-04 14:20', 0, 31.4325, 73.0899),
-//   ('Usman Ali', '03041112233', '2025-11-06 08:45', 1, 31.4120, 73.0752),
-//   ('Sara Nawaz', '03054445566', '2025-11-03 19:10', 0, 31.4263, 73.0821),
-//   ('Bilal Hussain', '03061114455', '2025-11-06 11:30', 1, 31.4155, 73.0972),
-//   ('Zainab Noor', '03075556644', '2025-11-05 16:50', 0, 31.4088, 73.0856),
-//   ('Ahmad Khan', '03082223344', '2025-11-06 07:25', 1, 31.4204, 73.0913),
-//   ('Mariam Iqbal', '03093334455', '2025-11-04 12:40', 0, 31.4176, 73.0888),
-//   ('Noman Siddiqui', '03111222333', '2025-11-06 09:50', 1, 31.4290, 73.0944),
-//   ('Hina Javed', '03123334455', '2025-11-05 20:05', 0, 31.4105, 73.0802),
-//   ('Kamran Abbas', '03134445566', '2025-11-06 10:15', 1, 31.4188, 73.1005),
-//   ('Sadia Imran', '03145556677', '2025-11-03 15:30', 0, 31.4277, 73.0866),
-//   ('Adnan Rafiq', '03156667788', '2025-11-06 08:05', 1, 31.4142, 73.0924),
-//   ('Iqra Shah', '03167778899', '2025-11-05 17:25', 0, 31.4160, 73.0819),
-//   ('Rashid Malik', '03178889900', '2025-11-06 07:55', 1, 31.4244, 73.0961),
-//   ('Laiba Aslam', '03189990011', '2025-11-04 11:10', 0, 31.4099, 73.0788),
-//   ('Tahir Zafar', '03211223344', '2025-11-06 09:40', 1, 31.4231, 73.0842),
-//   ('Nida Farooq', '03223334455', '2025-11-05 18:00', 0, 31.4152, 73.0895)
+//       INSERT INTO customer (name, phone, last_seen, visited, latitude, longitude,location_status) VALUES
+//   ('Ali Raza', '03001234567', '2025-11-06 10:00', 'Unvisited', 31.4182, 73.0791, 'Not Updated'),
+//   ('Ayesha Khan', '03019876543', '2025-11-05 18:30','Unvisited', 31.4220, 73.0954, 'Not Updated'),
+//   ('Hassan Ahmed', '03025557788', '2025-11-06 09:15', 'Unvisited', 31.4068, 73.1015, 'Not Updated'),
+//   ('Fatima Tariq', '03037778899', '2025-11-04 14:20', 'Unvisited', 31.4325, 73.0899, 'Not Updated'),
+//   ('Usman Ali', '03041112233', '2025-11-06 08:45', 'Unvisited', 31.4120, 73.0752,'Not Updated'),
+//   ('Sara Nawaz', '03054445566', '2025-11-03 19:10','Unvisited', 31.4263, 73.0821,'Not Updated'),
+//   ('Bilal Hussain', '03061114455', '2025-11-06 11:30', 'Unvisited', 31.4155, 73.0972,'Not Updated'),
+//   ('Zainab Noor', '03075556644', '2025-11-05 16:50', 'Unvisited', 31.4088, 73.0856,'Not Updated'),
+//   ('Ahmad Khan', '03082223344', '2025-11-06 07:25', 'Unvisited', 31.4204, 73.0913,'Not Updated'),
+//   ('Mariam Iqbal', '03093334455', '2025-11-04 12:40', 'Unvisited', 31.4176, 73.0888,'Not Updated'),
+//   ('Noman Siddiqui', '03111222333', '2025-11-06 09:50', 'Unvisited', 31.4290, 73.0944,'Not Updated'),
+//   ('Hina Javed', '03123334455', '2025-11-05 20:05', 'Unvisited', 31.4105, 73.0802,'Not Updated'),
+//   ('Kamran Abbas', '03134445566', '2025-11-06 10:15', 'Unvisited', 31.4188, 73.1005,'Not Updated'),
+//   ('Sadia Imran', '03145556677', '2025-11-03 15:30', 'Unvisited', 31.4277, 73.0866,'Not Updated'),
+//   ('Adnan Rafiq', '03156667788', '2025-11-06 08:05', 'Unvisited', 31.4142, 73.0924,'Not Updated'),
+//   ('Iqra Shah', '03167778899', '2025-11-05 17:25', 'Unvisited', 31.4160, 73.0819,'Not Updated'),
+//   ('Rashid Malik', '03178889900', '2025-11-06 07:55', 'Unvisited', 31.4244, 73.0961,'Not Updated'),
+//   ('Laiba Aslam', '03189990011', '2025-11-04 11:10', 'Unvisited', 31.4099, 73.0788,'Not Updated'),
+//   ('Tahir Zafar', '03211223344', '2025-11-06 09:40', 'Unvisited', 31.4231, 73.0842,'Not Updated'),
+//   ('Nida Farooq', '03223334455', '2025-11-05 18:00', 'Unvisited', 31.4152, 73.0895,'Not Updated')
 //     `);
 //   }
 
-//   // Insert dummy items if empty
-//   const existingItems = await db.getAllAsync(
-//     "SELECT COUNT(*) as count FROM items"
-//   );
-//   if (existingItems?.[0]?.count === 0) {
-//    await db.runAsync(`
-//   INSERT INTO items (name, price, image) VALUES
-//   -- 🧵 Clothing & Textiles
-//   ('Cotton Fabric Roll', 1200, ''),
-//   ('Polyester Yarn', 850, ''),
-//   ('Silk Dupatta', 500, ''),
-//   ('Denim Jeans', 2200, ''),
-//   ('Formal Shirt', 2100, ''),
-//   ('T-Shirt Pack', 1500, ''),
-//   ('Winter Jacket', 4500, ''),
+//  // Insert dummy items if empty
+// const existingItems = await db.getAllAsync(
+//   "SELECT COUNT(*) as count FROM items"
+// );
+// if (existingItems?.[0]?.count === 0) {
+//   await db.runAsync(`
+//     INSERT INTO items (name, price, type, image) VALUES
+//     -- 🧵 Clothing & Textiles
+//     ('Cotton Fabric Roll', 1200, 'Clothing', ''),
+//     ('Polyester Yarn', 850, 'Clothing', ''),
+//     ('Silk Dupatta', 500, 'Clothing', ''),
+//     ('Denim Jeans', 2200, 'Clothing', ''),
+//     ('Formal Shirt', 2100, 'Clothing', ''),
+//     ('T-Shirt Pack', 1500, 'Clothing', ''),
+//     ('Winter Jacket', 4500, 'Clothing', ''),
 
-//   -- 🛒 Groceries
-//   ('Basmati Rice 5kg', 1700, ''),
-//   ('Cooking Oil 1L', 620, ''),
-//   ('Sugar 1kg', 180, ''),
-//   ('Wheat Flour 10kg', 1650, ''),
-//   ('Tea Pack 250g', 450, ''),
-//   ('Milk Carton 1L', 270, ''),
-//   ('Eggs (Dozen)', 320, ''),
+//     -- 🛒 Groceries
+//     ('Basmati Rice 5kg', 1700, 'Grocery', ''),
+//     ('Cooking Oil 1L', 620, 'Grocery', ''),
+//     ('Sugar 1kg', 180, 'Grocery', ''),
+//     ('Wheat Flour 10kg', 1650, 'Grocery', ''),
+//     ('Tea Pack 250g', 450, 'Grocery', ''),
+//     ('Milk Carton 1L', 270, 'Grocery', ''),
+//     ('Eggs (Dozen)', 320, 'Grocery', ''),
 
-//   -- 🧴 Household & Cleaning
-//   ('Washing Powder 1kg', 480, ''),
-//   ('Dishwashing Liquid 500ml', 350, ''),
-//   ('Bath Soap 3-Pack', 250, ''),
-//   ('Shampoo 400ml', 600, ''),
-//   ('Toothpaste 150g', 200, ''),
+//     -- 🧴 Household & Cleaning
+//     ('Washing Powder 1kg', 480, 'Household', ''),
+//     ('Dishwashing Liquid 500ml', 350, 'Household', ''),
+//     ('Bath Soap 3-Pack', 250, 'Household', ''),
+//     ('Shampoo 400ml', 600, 'Household', ''),
+//     ('Toothpaste 150g', 200, 'Household', ''),
 
-//   -- 💻 Electronics
-//   ('LED Bulb 12W', 350, ''),
-//   ('Power Bank 10000mAh', 2800, ''),
-//   ('Bluetooth Earbuds', 4200, ''),
-//   ('USB Cable Type-C', 350, ''),
-//   ('Mobile Charger', 950, ''),
+//     -- 💻 Electronics
+//     ('LED Bulb 12W', 350, 'Electronics', ''),
+//     ('Power Bank 10000mAh', 2800, 'Electronics', ''),
+//     ('Bluetooth Earbuds', 4200, 'Electronics', ''),
+//     ('USB Cable Type-C', 350, 'Electronics', ''),
+//     ('Mobile Charger', 950, 'Electronics', ''),
 
-//   -- 🏠 Home & Kitchen
-//   ('Plastic Chair', 1200, ''),
-//   ('Stainless Steel Pan', 2100, ''),
-//   ('Curtain Set', 2500, ''),
-//   ('Wall Clock', 1450, ''),
-//   ('Floor Mat', 850, '')
-// `);
+//     -- 🏠 Home & Kitchen
+//     ('Plastic Chair', 1200, 'Home & Kitchen', ''),
+//     ('Stainless Steel Pan', 2100, 'Home & Kitchen', ''),
+//     ('Curtain Set', 2500, 'Home & Kitchen', ''),
+//     ('Wall Clock', 1450, 'Home & Kitchen', ''),
+//     ('Floor Mat', 850, 'Home & Kitchen', '')
+//   `);
+// }
 
-//   }
+
+//    // Initialize daily activity log
+//   await initDailyActivityLog();
 // };
 
 // // ---------------------- CUSTOMER FUNCTIONS ----------------------
@@ -669,18 +723,79 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 // };
 
 // export const updateVisited = async (id, visited) => {
-//   await db.runAsync("UPDATE customer SET visited = ? WHERE entity_id = ?", [
-//     visited,
-//     id,
-//   ]);
+//   const status = visited ? "Yes" : "No";
+//   await db.runAsync(
+//     "UPDATE customer SET visited = ? WHERE entity_id = ?",
+//     [status, id]
+//   );
 // };
 
-// export const addCustomer = async (name, phone, last_seen, visited = 0) => {
+// export const addCustomer = async (name, phone, last_seen, visited = "Unvisited") => {
 //   await db.runAsync(
 //     "INSERT INTO customer (name, phone, last_seen, visited) VALUES (?, ?, ?, ?)",
 //     [name, phone, last_seen, visited]
 //   );
 // };
+
+
+// // ---------------------- DAILY ACTIVITY LOG FUNCTIONS ----------------------
+
+// // Initialize activity log for all customers today
+// export const initDailyActivityLog = async () => {
+//   const today = new Date().toISOString().split("T")[0];
+//   const customers = await getAllCustomers();
+
+//   for (let customer of customers) {
+//     const exists = await db.getAllAsync(
+//       "SELECT * FROM activity_log WHERE customer_id = ? AND date = ?",
+//       [customer.entity_id, today]
+//     );
+//     if (exists.length === 0) {
+//       await db.runAsync(
+//         "INSERT INTO activity_log (customer_id, customer_name, date) VALUES (?, ?, ?)",
+//         [customer.entity_id, customer.name, today]
+//       );
+//     }
+//   }
+// };
+
+// // Mark customer as visited (updates both customer table and activity log)
+// export const markCustomerVisited = async (customer_id) => {
+//   const today = new Date().toISOString().split("T")[0];
+//   await db.runAsync(
+//     "UPDATE customer SET visited = 'Visited' WHERE entity_id = ?",
+//     [customer_id]
+//   );
+//   await db.runAsync(
+//     "UPDATE activity_log SET status = 'Visited' WHERE customer_id = ? AND date = ?",
+//     [customer_id, today]
+//   );
+// };
+
+// // Optional: reset all customers to 'Unvisited' at the start of a new day
+// export const resetDailyCustomerStatus = async () => {
+//   await db.runAsync("UPDATE customer SET visited = 'Unvisited'");
+//   await initDailyActivityLog();
+// };
+
+// // Get activity log for today
+// export const getTodayActivityLog = async () => {
+//   const today = new Date().toISOString().split("T")[0];
+//   return await db.getAllAsync(
+//     "SELECT * FROM activity_log WHERE date = ? ORDER BY customer_id ASC",
+//     [today]
+//   );
+// };
+
+
+// // Update last_seen for a customer
+// export const updateCustomerLastSeen = async (customer_id, last_seen) => {
+//   await db.runAsync(
+//     "UPDATE customer SET last_seen = ? WHERE entity_id = ?",
+//     [last_seen, customer_id]
+//   );
+// };
+
 
 // // ---------------------- ITEM FUNCTIONS ----------------------
 // export const getItems = async (query = "") => {
@@ -700,6 +815,18 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 
 // // ---------------------- ORDER BOOKING FUNCTIONS ----------------------
 
+// // Helper to get current local datetime
+// const getCurrentDateTime = () => {
+//   const now = new Date();
+//   const yyyy = now.getFullYear();
+//   const mm = String(now.getMonth() + 1).padStart(2, "0");
+//   const dd = String(now.getDate()).padStart(2, "0");
+//   const hh = String(now.getHours()).padStart(2, "0");
+//   const min = String(now.getMinutes()).padStart(2, "0");
+//   const ss = String(now.getSeconds()).padStart(2, "0");
+//   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+// };
+
 // // Add main order (returns booking_id)
 // export const addOrderBooking = async (order) => {
 //   const result = await db.runAsync(
@@ -713,7 +840,26 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 //       order.created_date,
 //     ]
 //   );
-//   return result.lastInsertRowId;
+
+//    const bookingId = result.lastInsertRowId;
+
+//   // ✅ Get current local datetime
+//   const now = getCurrentDateTime();
+//   const today = now.split(" ")[0]; // extract YYYY-MM-DD for activity_log
+
+//   // Automatically mark customer as visited and update last_seen
+//   await db.runAsync(
+//     "UPDATE customer SET visited = 'Visited', last_seen = ? WHERE entity_id = ?",
+//     [now, order.customer_id]
+//   );
+
+//   // Update daily activity log
+//   await db.runAsync(
+//     "UPDATE activity_log SET status = 'Visited' WHERE customer_id = ? AND date = ?",
+//     [order.customer_id, today]
+//   );
+
+//   return bookingId;
 // };
 
 // // Add order booking line — fixed to ensure data is committed
@@ -883,18 +1029,27 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
 //   }
 // };
 
-// // Optional: Update last_seen along with location
-// export const updateCustomerLocationWithLastSeen = async (customer_id, latitude, longitude) => {
+// // Update location, last_seen, and location_status
+// export const updateCustomerLocationWithLastSeen = async (customer_id, latitude, longitude, status) => {
 //   const last_seen = new Date().toISOString();
 //   try {
 //     await db.runAsync(
 //       `UPDATE customer 
-//        SET latitude = ?, longitude = ?, last_seen = ? 
+//        SET latitude = ?, longitude = ?, last_seen = ?, location_status = ? 
 //        WHERE entity_id = ?`,
-//       [latitude, longitude, last_seen, customer_id]
+//       [latitude, longitude, last_seen, status, customer_id]
 //     );
-//     console.log(`Customer ${customer_id} location and last_seen updated.`);
+//     console.log(`Customer ${customer_id} location, last_seen, and status updated.`);
 //   } catch (error) {
-//     console.error("Error updating customer location and last_seen:", error);
+//     console.error("Error updating customer location, last_seen, and status:", error);
 //   }
+// };
+
+
+// export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, note, attachment }) => {
+//   return await db.runAsync(
+//     `INSERT INTO customerReceipts (customer_id, cash_bank_id, amount, note, attachment)
+//      VALUES (?, ?, ?, ?, ?)`,
+//     [customer_id, cash_bank_id, amount, note, attachment]
+//   );
 // };
