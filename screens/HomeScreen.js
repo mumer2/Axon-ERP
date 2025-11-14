@@ -127,6 +127,9 @@ export default function HomeScreen({ navigation }) {
      else if (item.title === "Update Location") {
       navigation.navigate("Update Location")
     }
+    else if (item.title === "Payment Recovery") {
+      navigation.navigate("Customers List")
+    }
   }}
             >
               <View style={styles.leftSection}>

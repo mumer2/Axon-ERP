@@ -69,6 +69,22 @@ export const initDB = async () => {
     );
   `);
 
+
+  // Customer Receipts Table
+await db.execAsync(`
+  CREATE TABLE IF NOT EXISTS customerReceipts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    customer_id INTEGER NOT NULL,
+    cash_bank_id TEXT NOT NULL,
+    amount REAL NOT NULL,
+    note TEXT,
+    attachment TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES customer(entity_id)
+  );
+`);
+
+
   // Insert dummy customers if empty
   const existingCustomers = await db.getAllAsync(
     "SELECT COUNT(*) as count FROM customer"
@@ -486,6 +502,16 @@ export const updateCustomerLocationWithLastSeen = async (customer_id, latitude, 
     console.error("Error updating customer location, last_seen, and status:", error);
   }
 };
+
+
+export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, note, attachment }) => {
+  return await db.runAsync(
+    `INSERT INTO customerReceipts (customer_id, cash_bank_id, amount, note, attachment)
+     VALUES (?, ?, ?, ?, ?)`,
+    [customer_id, cash_bank_id, amount, note, attachment]
+  );
+};
+
 
 
 

@@ -25,6 +25,8 @@ import AllRecentActivities from "./screens/AllRecentActivities";
 import LiveTrackingScreen from "./screens/LiveTrackingScreen";
 import UpdateLocationScreen from "./screens/UpdateLocationScreen";
 import UpdateLocationMapScreen from "./screens/UpdateLocationMapScreen";
+import CustomerPaymentRecovery from "./screens/CustomerPaymentRecovery";
+import PaymentRecoveryForm from "./screens/PaymentRecoveryForm";
 
 const Stack = createNativeStackNavigator();
 
@@ -93,6 +95,8 @@ export default function App() {
             <Stack.Screen name="Live Tracking" component={LiveTrackingScreen} options={{ headerShown: true }} />
             <Stack.Screen name="Update Location" component={UpdateLocationScreen} options={{ headerShown: true }} />
             <Stack.Screen name="Update Location Map" component={UpdateLocationMapScreen} options={{ headerShown: true }} />
+            <Stack.Screen name="Customers List" component={CustomerPaymentRecovery} options={{ headerShown: true }} />
+            <Stack.Screen name="Payment Recovery Form" component={PaymentRecoveryForm} options={{ headerShown: true }} />
 
           </Stack.Navigator>
         </NavigationContainer>
