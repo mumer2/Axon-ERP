@@ -19,7 +19,9 @@ const { width, height } = Dimensions.get("window");
 export default function UpdateLocationMapScreen({ route, navigation }) {
   const { customer } = route.params;
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
+  // GET CURRENT LOCATION
   useEffect(() => {
     const fetchLocation = async () => {
       try {
@@ -45,31 +47,36 @@ export default function UpdateLocationMapScreen({ route, navigation }) {
     fetchLocation();
   }, []);
 
- const handleUpdateLocation = async () => {
-  if (!currentLocation) {
-    Alert.alert("Location not available", "Waiting for GPS signal...");
-    return;
-  }
+  // TAP ON MAP TO SELECT LOCATION
+  const handleMapPress = (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setSelectedLocation({ latitude, longitude });
+  };
 
-  try {
-    await updateCustomerLocationWithLastSeen(
-      customer.entity_id,
-      currentLocation.latitude,
-      currentLocation.longitude,
-      "Updated" // mark as updated
-    );
+  // UPDATE LOCATION
+  const handleUpdateLocation = async () => {
+    const finalLocation = selectedLocation || currentLocation;
 
-    Alert.alert("Success", `${customer.name}'s location has been updated!`);
-    
-    // Pass back a flag to reload data in previous screen
-    navigation.navigate("Update Location", { reload: true });
+    if (!finalLocation) {
+      Alert.alert("Location not available", "Waiting for GPS signal...");
+      return;
+    }
 
-  } catch (error) {
-    console.error("Error updating location:", error);
-    Alert.alert("Error", "Failed to update location.");
-  }
-};
+    try {
+      await updateCustomerLocationWithLastSeen(
+        customer.entity_id,
+        finalLocation.latitude,
+        finalLocation.longitude,
+        "Updated"
+      );
 
+      Alert.alert("Success", `${customer.name}'s location has been updated!`);
+      navigation.navigate("Update Location", { reload: true });
+    } catch (error) {
+      console.error("Error updating location:", error);
+      Alert.alert("Error", "Failed to update location.");
+    }
+  };
 
   if (!currentLocation) {
     return (
@@ -80,11 +87,10 @@ export default function UpdateLocationMapScreen({ route, navigation }) {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={["bottom","left","right"]}>
+    <SafeAreaView style={{ flex: 1 }} edges={["bottom", "left", "right"]}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <View style={styles.container}>
           <MapView
@@ -95,15 +101,16 @@ export default function UpdateLocationMapScreen({ route, navigation }) {
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             }}
+            onPress={handleMapPress} // ✅ Register taps
           >
-            {/* Current Location */}
+            {/* CURRENT LOCATION */}
             <Marker
               coordinate={currentLocation}
               title="You are here"
               pinColor="blue"
             />
 
-            {/* Customer's Last Known Location */}
+            {/* CUSTOMER LAST LOCATION */}
             {customer.latitude && customer.longitude && (
               <Marker
                 coordinate={{
@@ -114,13 +121,26 @@ export default function UpdateLocationMapScreen({ route, navigation }) {
                 pinColor={customer.location_status === "Updated" ? "#cce5ff" : "red"}
               />
             )}
+
+            {/* SELECTED LOCATION */}
+            {selectedLocation && (
+              <Marker
+                coordinate={selectedLocation}
+                title="Selected Location"
+                pinColor="green"
+              />
+            )}
           </MapView>
 
           <TouchableOpacity
             style={styles.updateButton}
             onPress={handleUpdateLocation}
           >
-            <Text style={styles.updateButtonText}>Update Location</Text>
+            <Text style={styles.updateButtonText}>
+              {selectedLocation
+                ? "Update Selected Location"
+                : "Update Current Location"}
+            </Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -157,6 +177,9 @@ const styles = StyleSheet.create({
 
 
 
+
+
+
 // import React, { useEffect, useState } from "react";
 // import {
 //   View,
@@ -179,7 +202,6 @@ const styles = StyleSheet.create({
 //   const { customer } = route.params;
 //   const [currentLocation, setCurrentLocation] = useState(null);
 
-//   // -------------------- Get Current Location --------------------
 //   useEffect(() => {
 //     const fetchLocation = async () => {
 //       try {
@@ -205,27 +227,31 @@ const styles = StyleSheet.create({
 //     fetchLocation();
 //   }, []);
 
-//   // -------------------- Update Customer Location --------------------
-//   const handleUpdateLocation = async () => {
-//     if (!currentLocation) {
-//       Alert.alert("Location not available", "Waiting for GPS signal...");
-//       return;
-//     }
+//  const handleUpdateLocation = async () => {
+//   if (!currentLocation) {
+//     Alert.alert("Location not available", "Waiting for GPS signal...");
+//     return;
+//   }
 
-//     try {
-//       await updateCustomerLocationWithLastSeen(
-//         customer.entity_id,
-//         currentLocation.latitude,
-//         currentLocation.longitude
-//       );
+//   try {
+//     await updateCustomerLocationWithLastSeen(
+//       customer.entity_id,
+//       currentLocation.latitude,
+//       currentLocation.longitude,
+//       "Updated" // mark as updated
+//     );
 
-//       Alert.alert("Success", `${customer.name}'s location has been updated!`);
-//       navigation.goBack();
-//     } catch (error) {
-//       console.error("Error updating location:", error);
-//       Alert.alert("Error", "Failed to update location.");
-//     }
-//   };
+//     Alert.alert("Success", `${customer.name}'s location has been updated!`);
+    
+//     // Pass back a flag to reload data in previous screen
+//     navigation.navigate("Update Location", { reload: true });
+
+//   } catch (error) {
+//     console.error("Error updating location:", error);
+//     Alert.alert("Error", "Failed to update location.");
+//   }
+// };
+
 
 //   if (!currentLocation) {
 //     return (
@@ -267,7 +293,7 @@ const styles = StyleSheet.create({
 //                   longitude: parseFloat(customer.longitude),
 //                 }}
 //                 title={`${customer.name}'s Last Location`}
-//                 pinColor="red"
+//                 pinColor={customer.location_status === "Updated" ? "#cce5ff" : "red"}
 //               />
 //             )}
 //           </MapView>

@@ -216,7 +216,7 @@ export const markCustomerVisited = async (customer_id) => {
 
 // Optional: reset all customers to 'Unvisited' at the start of a new day
 export const resetDailyCustomerStatus = async () => {
-  await db.runAsync("UPDATE customer SET visited = ''UnVisited''");
+  await db.runAsync("UPDATE customer SET visited = 'Unvisited'");
   await initDailyActivityLog();
 };
 
