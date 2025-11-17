@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { ArrowUpRight, Bell, Eye, EyeOff } from "lucide-react-native";
+import { ArrowUpRight, Scan, Eye, EyeOff } from "lucide-react-native";
 import OtherReports from "./OtherReports";
 import RecentActivitySection from "./RecentActivitySection";
 
@@ -79,8 +79,8 @@ export default function HomeScreen({ navigation }) {
 
             {/* Bell & Hide/Show Balance Icons */}
             <View style={styles.iconRow}>
-              <TouchableOpacity style={styles.bellContainer}>
-                <Bell size={22} color="#000" />
+              <TouchableOpacity style={styles.bellContainer} onPress={() => navigation.navigate('QRScan')}>
+                <Scan size={22} color="#000" />
               </TouchableOpacity>
             </View>
           </View>

@@ -75,9 +75,40 @@ export default function UpdateLocationScreen({ navigation }) {
   const profileColors = ["#FF6B6B", "#6BCB77", "#4D96FF", "#FFD93D", "#FF6EC7", "#9B5DE5", "#00F5D4", "#F9C74F"];
   const getProfileColor = (id) => profileColors[id % profileColors.length];
 
-  const renderCustomerItem = ({ item }) => (
-    <TouchableOpacity style={styles.customerItem} onPress={() => handleSelectCustomer(item)}>
-      <View style={[styles.profileCircle, { backgroundColor: getProfileColor(item.entity_id) }]}>
+  // const renderCustomerItem = ({ item }) => (
+  //   <TouchableOpacity style={styles.customerItem} onPress={() => handleSelectCustomer(item)}>
+  //     <View style={[styles.profileCircle, { backgroundColor: getProfileColor(item.entity_id) }]}>
+  //       <Text style={styles.profileText}>{item.name.charAt(0).toUpperCase()}</Text>
+  //     </View>
+
+  //     <View style={styles.customerInfo}>
+  //       <Text style={styles.customerName}>{item.name}</Text>
+  //       <Text style={styles.customerPhone}>{item.phone || "No Phone"}</Text>
+  //     </View>
+
+  //     <TouchableOpacity onPress={() => handleSelectCustomer(item)} style={[
+  //       styles.updateIcon,
+  //       { backgroundColor: item.location_status === "Updated" ? "#007bff" : "#cce5ff" }
+  //     ]}>
+  //       <MapPin size={24} color={item.location_status === "Updated" ? "#fff" : "#007bff"} />
+  //     </TouchableOpacity>
+  //   </TouchableOpacity>
+  // );
+  const renderCustomerItem = ({ item }) => {
+  const hasLocation = item.latitude != null && item.longitude != null;
+
+  return (
+    <TouchableOpacity
+      style={styles.customerItem}
+      onPress={() => handleSelectCustomer(item)} // always clickable
+      activeOpacity={0.7}
+    >
+      <View
+        style={[
+          styles.profileCircle,
+          { backgroundColor: getProfileColor(item.entity_id) },
+        ]}
+      >
         <Text style={styles.profileText}>{item.name.charAt(0).toUpperCase()}</Text>
       </View>
 
@@ -86,14 +117,29 @@ export default function UpdateLocationScreen({ navigation }) {
         <Text style={styles.customerPhone}>{item.phone || "No Phone"}</Text>
       </View>
 
-      <TouchableOpacity onPress={() => handleSelectCustomer(item)} style={[
-        styles.updateIcon,
-        { backgroundColor: item.location_status === "Updated" ? "#007bff" : "#cce5ff" }
-      ]}>
-        <MapPin size={24} color={item.location_status === "Updated" ? "#fff" : "#007bff"} />
-      </TouchableOpacity>
+      <View
+        style={[
+          styles.updateIcon,
+          {
+            backgroundColor: hasLocation
+              ? item.location_status === "Updated"
+                ? "#007bff"
+                : "#007bff" // dark for customers with location
+              : "#ddd", // dull gray for no location
+          },
+        ]}
+      >
+        <MapPin
+          size={24}
+          color={hasLocation
+            ? "#fff" // colored icon for existing location
+            : "#888"} // gray for no location
+        />
+      </View>
     </TouchableOpacity>
   );
+};
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }} edges={["bottom","left","right"]}>

@@ -104,15 +104,21 @@ export default function LiveTrackingScreen({ route }) {
   }, []);
 
   // ----------------------- Handle Passed Customer -----------------------
+
   useEffect(() => {
-    if (passedCustomer && !passedCustomerUsed.current) {
+  if (passedCustomer && !passedCustomerUsed.current && currentLocation) {
+    if (passedCustomer.latitude != null && passedCustomer.longitude != null) {
       passedCustomerUsed.current = true;
       setSelectedCustomer(passedCustomer);
+      setTracking(true);
 
       const customerLoc = {
         latitude: parseFloat(passedCustomer.latitude),
         longitude: parseFloat(passedCustomer.longitude),
       };
+
+      fetchRoute(currentLocation, customerLoc);
+      updateDistance(currentLocation, customerLoc);
 
       if (mapRef.current) {
         mapRef.current.animateToRegion(
@@ -125,61 +131,128 @@ export default function LiveTrackingScreen({ route }) {
           1000
         );
       }
-
-      if (currentLocation) {
-        setTracking(true);
-        updateDistance(currentLocation, customerLoc);
-        fetchRoute(currentLocation, customerLoc);
-      }
     }
-  }, [passedCustomer, currentLocation]);
+  }
+}, [passedCustomer, currentLocation]);
+
+  // useEffect(() => {
+  //   if (passedCustomer && !passedCustomerUsed.current) {
+  //     passedCustomerUsed.current = true;
+  //     setSelectedCustomer(passedCustomer);
+
+  //     const customerLoc = {
+  //       latitude: parseFloat(passedCustomer.latitude),
+  //       longitude: parseFloat(passedCustomer.longitude),
+  //     };
+
+  //     if (mapRef.current) {
+  //       mapRef.current.animateToRegion(
+  //         {
+  //           latitude: customerLoc.latitude,
+  //           longitude: customerLoc.longitude,
+  //           latitudeDelta: 0.01,
+  //           longitudeDelta: 0.01,
+  //         },
+  //         1000
+  //       );
+  //     }
+
+  //     if (currentLocation) {
+  //       setTracking(true);
+  //       updateDistance(currentLocation, customerLoc);
+  //       fetchRoute(currentLocation, customerLoc);
+  //     }
+  //   }
+  // }, [passedCustomer, currentLocation]);
 
   // ----------------------- Search Customers -----------------------
   // ----------------------- Search Customers -----------------------
   const handleSearch = async (text) => {
-    setSearchQuery(text);
-    if (text.trim() === "") {
-      setFilteredCustomers(customers);
-      setSelectedCustomer(null);
-      setRouteCoords([]);
-      setTracking(false);
-    } else {
-      const data = await searchCustomers(text);
-      setFilteredCustomers(data);
+  setSearchQuery(text);
+  if (text.trim() === "") {
+    setFilteredCustomers(customers);
+    setSelectedCustomer(null);
+    setRouteCoords([]);
+    setTracking(false);
+  } else {
+    const data = await searchCustomers(text);
+    setFilteredCustomers(data);
 
-      if (data.length === 1) {
-        const customer = data[0];
-        setSelectedCustomer(customer);
+    // Auto-track only if customer has valid location
+    if (data.length === 1 && data[0].latitude != null && data[0].longitude != null) {
+      const customer = data[0];
+      setSelectedCustomer(customer);
+      setTracking(true);
 
-        // Automatically start tracking
-        if (currentLocation && customer.latitude && customer.longitude) {
-          setTracking(true);
+      const customerLoc = {
+        latitude: parseFloat(customer.latitude),
+        longitude: parseFloat(customer.longitude),
+      };
 
-          const customerLoc = {
-            latitude: parseFloat(customer.latitude),
-            longitude: parseFloat(customer.longitude),
-          };
+      updateDistance(currentLocation, customerLoc);
+      fetchRoute(currentLocation, customerLoc);
 
-          updateDistance(currentLocation, customerLoc);
-          fetchRoute(currentLocation, customerLoc);
-
-          if (mapRef.current) {
-            mapRef.current.animateToRegion(
-              {
-                latitude: customerLoc.latitude,
-                longitude: customerLoc.longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01,
-              },
-              1000
-            );
-          }
-        }
-      } else {
-        setSelectedCustomer(null);
+      if (mapRef.current) {
+        mapRef.current.animateToRegion(
+          {
+            latitude: customerLoc.latitude,
+            longitude: customerLoc.longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          1000
+        );
       }
+    } else {
+      setSelectedCustomer(null);
     }
-  };
+  }
+};
+
+  // const handleSearch = async (text) => {
+  //   setSearchQuery(text);
+  //   if (text.trim() === "") {
+  //     setFilteredCustomers(customers);
+  //     setSelectedCustomer(null);
+  //     setRouteCoords([]);
+  //     setTracking(false);
+  //   } else {
+  //     const data = await searchCustomers(text);
+  //     setFilteredCustomers(data);
+
+  //     if (data.length === 1) {
+  //       const customer = data[0];
+  //       setSelectedCustomer(customer);
+
+  //       // Automatically start tracking
+  //       if (currentLocation && customer.latitude && customer.longitude) {
+  //         setTracking(true);
+
+  //         const customerLoc = {
+  //           latitude: parseFloat(customer.latitude),
+  //           longitude: parseFloat(customer.longitude),
+  //         };
+
+  //         updateDistance(currentLocation, customerLoc);
+  //         fetchRoute(currentLocation, customerLoc);
+
+  //         if (mapRef.current) {
+  //           mapRef.current.animateToRegion(
+  //             {
+  //               latitude: customerLoc.latitude,
+  //               longitude: customerLoc.longitude,
+  //               latitudeDelta: 0.01,
+  //               longitudeDelta: 0.01,
+  //             },
+  //             1000
+  //           );
+  //         }
+  //       }
+  //     } else {
+  //       setSelectedCustomer(null);
+  //     }
+  //   }
+  // };
 
   // ----------------------- Fetch Route -----------------------
   const fetchRoute = async (origin, destination) => {
@@ -394,7 +467,7 @@ export default function LiveTrackingScreen({ route }) {
                 longitudeDelta: 0.05,
               }}
             >
-              {(selectedCustomer ? [selectedCustomer] : filteredCustomers).map(
+              {/* {(selectedCustomer ? [selectedCustomer] : filteredCustomers).map(
                 (cust, index) =>
                   cust && cust.latitude && cust.longitude ? (
                     <Marker
@@ -418,7 +491,29 @@ export default function LiveTrackingScreen({ route }) {
                       onPress={() => handleMarkerPress(cust)}
                     />
                   ) : null
-              )}
+              )} */}
+              {(selectedCustomer ? [selectedCustomer] : filteredCustomers).map(
+  (cust, index) =>
+    cust?.latitude != null && cust?.longitude != null ? (
+      <Marker
+        key={cust.entity_id ? cust.entity_id.toString() : `marker-${index}`}
+        coordinate={{
+          latitude: parseFloat(cust.latitude),
+          longitude: parseFloat(cust.longitude),
+        }}
+        title={cust.name}
+        pinColor={
+          selectedCustomer?.entity_id === cust.entity_id
+            ? "#007bff"
+            : cust.visited === "Visited"
+            ? "green"
+            : "red"
+        }
+        onPress={() => handleMarkerPress(cust)}
+      />
+    ) : null
+)}
+
 
               {routeCoords.length > 0 && (
                 <Polyline
@@ -550,6 +645,16 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16, color: "#333" },
 });
+
+
+
+
+
+
+
+
+
+
 
 // import React, { useEffect, useState, useRef } from "react";
 // import {

@@ -219,7 +219,7 @@ export default function ItemsScreen({ navigation, route }) {
           source={
             useUri
               ? { uri: item.image.trim() }
-              : require("../assets/Images/placeholderItem.png")
+              : require("../assets/Images/placeholder.png")
           }
           style={styles.itemImage}
           resizeMode="cover"

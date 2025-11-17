@@ -70,6 +70,14 @@ export const initDB = async () => {
     );
   `);
 
+  // App Settings table for reset tracking
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+      id INTEGER PRIMARY KEY,
+      last_reset_date TEXT
+    );
+  `);
+
 
   // Customer Receipts Table
 await db.execAsync(`
@@ -91,29 +99,29 @@ await db.execAsync(`
     "SELECT COUNT(*) as count FROM customer"
   );
   if (existingCustomers?.[0]?.count === 0) {
-    await db.runAsync(`
-      INSERT INTO customer (name, phone, last_seen, visited, latitude, longitude,location_status) VALUES
-  ('Ali Raza', '03001234567', '2025-11-06 10:00', 'Unvisited', 31.4182, 73.0791, 'Not Updated'),
-  ('Ayesha Khan', '03019876543', '2025-11-05 18:30','Unvisited', 31.4220, 73.0954, 'Not Updated'),
-  ('Hassan Ahmed', '03025557788', '2025-11-06 09:15', 'Unvisited', 31.4068, 73.1015, 'Not Updated'),
+  await db.runAsync(`
+  INSERT INTO customer (name, phone, last_seen, visited, latitude, longitude, location_status) VALUES
+  ('Ali Raza', '03001234567', '2025-11-06 10:00', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Ayesha Khan', '03019876543', '2025-11-05 18:30', 'Unvisited', 31.4220, 73.0954, 'Not Updated'),
+  ('Hassan Ahmed', '03025557788', '2025-11-06 09:15', 'Unvisited', NULL, NULL, 'Not Updated'),
   ('Fatima Tariq', '03037778899', '2025-11-04 14:20', 'Unvisited', 31.4325, 73.0899, 'Not Updated'),
-  ('Usman Ali', '03041112233', '2025-11-06 08:45', 'Unvisited', 31.4120, 73.0752,'Not Updated'),
-  ('Sara Nawaz', '03054445566', '2025-11-03 19:10','Unvisited', 31.4263, 73.0821,'Not Updated'),
-  ('Bilal Hussain', '03061114455', '2025-11-06 11:30', 'Unvisited', 31.4155, 73.0972,'Not Updated'),
-  ('Zainab Noor', '03075556644', '2025-11-05 16:50', 'Unvisited', 31.4088, 73.0856,'Not Updated'),
-  ('Ahmad Khan', '03082223344', '2025-11-06 07:25', 'Unvisited', 31.4204, 73.0913,'Not Updated'),
-  ('Mariam Iqbal', '03093334455', '2025-11-04 12:40', 'Unvisited', 31.4176, 73.0888,'Not Updated'),
-  ('Noman Siddiqui', '03111222333', '2025-11-06 09:50', 'Unvisited', 31.4290, 73.0944,'Not Updated'),
-  ('Hina Javed', '03123334455', '2025-11-05 20:05', 'Unvisited', 31.4105, 73.0802,'Not Updated'),
-  ('Kamran Abbas', '03134445566', '2025-11-06 10:15', 'Unvisited', 31.4188, 73.1005,'Not Updated'),
-  ('Sadia Imran', '03145556677', '2025-11-03 15:30', 'Unvisited', 31.4277, 73.0866,'Not Updated'),
-  ('Adnan Rafiq', '03156667788', '2025-11-06 08:05', 'Unvisited', 31.4142, 73.0924,'Not Updated'),
-  ('Iqra Shah', '03167778899', '2025-11-05 17:25', 'Unvisited', 31.4160, 73.0819,'Not Updated'),
-  ('Rashid Malik', '03178889900', '2025-11-06 07:55', 'Unvisited', 31.4244, 73.0961,'Not Updated'),
-  ('Laiba Aslam', '03189990011', '2025-11-04 11:10', 'Unvisited', 31.4099, 73.0788,'Not Updated'),
-  ('Tahir Zafar', '03211223344', '2025-11-06 09:40', 'Unvisited', 31.4231, 73.0842,'Not Updated'),
-  ('Nida Farooq', '03223334455', '2025-11-05 18:00', 'Unvisited', 31.4152, 73.0895,'Not Updated')
-    `);
+  ('Usman Ali', '03041112233', '2025-11-06 08:45', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Sara Nawaz', '03054445566', '2025-11-03 19:10', 'Unvisited', 31.4263, 73.0821, 'Not Updated'),
+  ('Bilal Hussain', '03061114455', '2025-11-06 11:30', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Zainab Noor', '03075556644', '2025-11-05 16:50', 'Unvisited', 31.4088, 73.0856, 'Not Updated'),
+  ('Ahmad Khan', '03082223344', '2025-11-06 07:25', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Mariam Iqbal', '03093334455', '2025-11-04 12:40', 'Unvisited', 31.4176, 73.0888, 'Not Updated'),
+  ('Noman Siddiqui', '03111222333', '2025-11-06 09:50', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Hina Javed', '03123334455', '2025-11-05 20:05', 'Unvisited', 31.4105, 73.0802, 'Not Updated'),
+  ('Kamran Abbas', '03134445566', '2025-11-06 10:15', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Sadia Imran', '03145556677', '2025-11-03 15:30', 'Unvisited', 31.4277, 73.0866, 'Not Updated'),
+  ('Adnan Rafiq', '03156667788', '2025-11-06 08:05', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Iqra Shah', '03167778899', '2025-11-05 17:25', 'Unvisited', 31.4160, 73.0819, 'Not Updated'),
+  ('Rashid Malik', '03178889900', '2025-11-06 07:55', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Laiba Aslam', '03189990011', '2025-11-04 11:10', 'Unvisited', 31.4099, 73.0788, 'Not Updated'),
+  ('Tahir Zafar', '03211223344', '2025-11-06 09:40', 'Unvisited', NULL, NULL, 'Not Updated'),
+  ('Nida Farooq', '03223334455', '2025-11-05 18:00', 'Unvisited', 31.4250, 73.0900, 'Not Updated')
+`);
   }
 
  // Insert dummy items if empty
@@ -211,12 +219,52 @@ export const initDailyActivityLog = async () => {
     );
     if (exists.length === 0) {
       await db.runAsync(
-        "INSERT INTO activity_log (customer_id, customer_name, date) VALUES (?, ?, ?)",
-        [customer.entity_id, customer.name, today]
+        "INSERT INTO activity_log (customer_id, customer_name, date, status) VALUES (?, ?, ?, ?)",
+        [customer.entity_id, customer.name, today, "Unvisited"]
       );
     }
   }
 };
+
+
+// Auto reset customer visited status once per day
+export const autoResetDailyVisitStatus = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  // Get last reset date
+  const row = await db.getFirstAsync(
+    "SELECT last_reset_date FROM app_settings WHERE id = 1"
+  );
+
+  if (!row) {
+    // First time app runs → insert today's date
+    await db.runAsync(
+      "INSERT INTO app_settings (id, last_reset_date) VALUES (1, ?)",
+      [today]
+    );
+
+    await initDailyActivityLog();
+    return;
+  }
+
+  // If today is different → new day → reset
+  if (row.last_reset_date !== today) {
+    console.log("New day detected → resetting visit status");
+
+    // Reset all customers to unvisited
+    await db.runAsync("UPDATE customer SET visited = 'Unvisited'");
+
+    // Create new daily activity log for today
+    await initDailyActivityLog();
+
+    // Update settings table
+    await db.runAsync(
+      "UPDATE app_settings SET last_reset_date = ? WHERE id = 1",
+      [today]
+    );
+  }
+};
+
 
 // Mark customer as visited (updates both customer table and activity log)
 export const markCustomerVisited = async (customer_id) => {
@@ -231,11 +279,11 @@ export const markCustomerVisited = async (customer_id) => {
   );
 };
 
-// Optional: reset all customers to 'Unvisited' at the start of a new day
-export const resetDailyCustomerStatus = async () => {
-  await db.runAsync("UPDATE customer SET visited = 'Unvisited'");
-  await initDailyActivityLog();
-};
+// // Optional: reset all customers to 'Unvisited' at the start of a new day
+// export const resetDailyCustomerStatus = async () => {
+//   await db.runAsync("UPDATE customer SET visited = 'Unvisited'");
+//   await initDailyActivityLog();
+// };
 
 // Get activity log for today
 export const getTodayActivityLog = async () => {
@@ -495,9 +543,9 @@ export const updateCustomerLocationWithLastSeen = async (customer_id, latitude, 
   try {
     await db.runAsync(
       `UPDATE customer 
-       SET latitude = ?, longitude = ?, last_seen = ?, location_status = ? 
+       SET latitude = ?, longitude = ?, location_status = ? 
        WHERE entity_id = ?`,
-      [latitude, longitude, last_seen, status, customer_id]
+      [latitude, longitude, status, customer_id]
     );
     console.log(`Customer ${customer_id} location, last_seen, and status updated.`);
   } catch (error) {
@@ -513,6 +561,18 @@ export const addCustomerReceipt = async ({ customer_id, cash_bank_id, amount, no
     [customer_id, cash_bank_id, amount, note, attachment]
   );
 };
+
+export const getAllCustomerReceipts = async () => {
+  return await db.getAllAsync(`
+    SELECT cr.id, cr.customer_id, cr.cash_bank_id, cr.amount, cr.note, cr.attachment, cr.created_at,
+           c.name AS customerName
+    FROM customerReceipts cr
+    LEFT JOIN customer c ON cr.customer_id = c.entity_id
+    ORDER BY cr.created_at DESC
+  `, []);
+};
+
+
 
 // Fetch orders for a specific customer with summary info
 export const getOrdersByCustomer = async (customerId) => {

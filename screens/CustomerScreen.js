@@ -127,7 +127,7 @@ export default function CustomerScreen({ navigation }) {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() =>
             navigation.navigate("Live Tracking", {
               customer: {
@@ -146,7 +146,32 @@ export default function CustomerScreen({ navigation }) {
             color="#007bff"
             style={{ marginTop: 6 }}
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+         <TouchableOpacity
+        onPress={() => {
+          if (item.latitude != null && item.longitude != null) {
+            navigation.navigate("Live Tracking", {
+              customer: {
+                id: item.entity_id,
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude,
+                visited: item.visited,
+              },
+            });
+          }
+        }}
+        disabled={item.latitude == null || item.longitude == null} // disable if no location
+      >
+        <Feather
+          name="map-pin"
+          size={20}
+          color={
+            item.latitude != null && item.longitude != null ? "#007bff" : "#ccc"
+          }
+          style={{ marginTop: 6 }}
+        />
+      </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
