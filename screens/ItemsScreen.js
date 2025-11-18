@@ -31,14 +31,16 @@ export default function ItemsScreen({ navigation, route }) {
   const [search, setSearch] = useState("");
   const [quantity, setQuantity] = useState({});
   const [newItemsToAdd, setNewItemsToAdd] = useState([]);
-  const [filterType, setFilterType] = useState("");
+  // const [filterType, setFilterType] = useState("");
+  const [filterType, setFilterType] = useState("All Items");
   const [types, setTypes] = useState([]);
   const [changedQuantity, setChangedQuantity] = useState({});
 
   useEffect(() => {
     const loadDB = async () => {
       await initDB();
-      await fetchItems();
+      // await fetchItems();
+      await fetchItems("", "All Items");
       await loadProductTypes();
       if (bookingId) await loadExistingOrder();
     };

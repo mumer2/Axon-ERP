@@ -10,7 +10,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { getAllOrders, getOrdersByCustomer } from "../database";
-import { Feather } from '@expo/vector-icons'; // Make sure you have @expo/vector-icons installed
+import { Home, QrCode } from "lucide-react-native";
+import { Feather } from '@expo/vector-icons'; 
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -119,7 +120,7 @@ export default function OrdersScreen() {
           style={styles.tab}
           onPress={() => navigation.navigate("MainTabs")}
         >
-          <Feather name="home" size={22} color="gray" />
+          <Home name="home" size={22} color="gray" />
           <Text style={styles.tabText}>Home</Text>
         </TouchableOpacity>
 
@@ -127,7 +128,7 @@ export default function OrdersScreen() {
           style={styles.tab}
           onPress={() => navigation.navigate("QRScan")}
         >
-          <Feather name="camera" size={22} color="gray" />
+          <QrCode name="camera" size={22} color="gray" />
           <Text style={styles.tabText}>QR Scan</Text>
         </TouchableOpacity>
       </View>
@@ -161,21 +162,21 @@ const styles = StyleSheet.create({
 
   bottomTabs: {
     position: "absolute",
-    bottom: 26,
+    bottom: 0,
     left: 0,
     right: 0,
-    height: 70,
+    height: 96,
+    paddingBottom:35,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderTopWidth: 0.5,
-    borderTopColor: "#ccc",
+    
   },
   tab: {
     alignItems: "center",
   },
-  tabText: { fontSize: 12, color: "gray", marginTop: 2 },
+  tabText: { fontSize: 10, color: "gray", marginTop: 2 },
 });
 
 

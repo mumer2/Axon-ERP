@@ -16,7 +16,7 @@ export default function BottomTabs() {
         headerShown: false,
         tabBarActiveTintColor: "#1E90FF",
         tabBarInactiveTintColor: "#999",
-        tabBarStyle: { height: 90 },
+        tabBarStyle: { height: 95 },
       }}
     >
       <Tab.Screen

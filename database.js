@@ -89,7 +89,7 @@ await db.execAsync(`
     amount REAL NOT NULL,
     note TEXT,
     attachment TEXT,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    created_at TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (customer_id) REFERENCES customer(entity_id)
   );
 `);

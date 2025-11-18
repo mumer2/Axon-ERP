@@ -77,6 +77,7 @@ export default function CustomerPaymentRecovery({ navigation }) {
             keyExtractor={(item) => item.entity_id.toString()}
             renderItem={renderCustomerItem}
             contentContainerStyle={{ paddingBottom: 80 }} // space for button
+            showsVerticalScrollIndicator={false}
           />
 
           {/* View All Payments Button */}
