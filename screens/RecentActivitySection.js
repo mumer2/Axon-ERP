@@ -54,7 +54,7 @@ export default function RecentActivitySection() {
         <Text style={styles.title}>Recent Activity</Text>
         <TouchableOpacity
           style={styles.seeMoreButton}
-          onPress={() => navigation.navigate("All Orders")}
+          onPress={() => navigation.getParent().navigate("All Orders")}
         >
           <Text style={styles.seeMoreText}>See more</Text>
         </TouchableOpacity>

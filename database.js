@@ -53,6 +53,7 @@ export const initDB = async () => {
       order_qty INTEGER NOT NULL,
       unit_price REAL NOT NULL,
       amount REAL NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (booking_id) REFERENCES order_booking(booking_id),
       FOREIGN KEY (item_id) REFERENCES items(id)
     );
@@ -592,6 +593,37 @@ export const getOrdersByCustomer = async (customerId) => {
     ORDER BY ob.booking_id DESC;
   `, [customerId]);
 };
+
+
+export const getTodaysSales = async () => {
+  const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+
+  const result = await db.getFirstAsync(
+    `SELECT SUM(amount) AS total FROM order_booking_line WHERE DATE(created_at) = ?`,
+    [today]
+  );
+
+  return result?.total || 0;
+};
+
+
+export const getLastMonthSales = async () => {
+  const now = new Date();
+  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+  const start = lastMonth.toISOString().split("T")[0];
+  const end = lastMonthEnd.toISOString().split("T")[0];
+
+  const result = await db.getFirstAsync(
+    `SELECT SUM(amount) AS total FROM order_booking_line 
+     WHERE DATE(created_at) BETWEEN ? AND ?`,
+    [start, end]
+  );
+
+  return result?.total || 0;
+};
+
 
 
 

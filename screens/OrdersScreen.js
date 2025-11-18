@@ -7,9 +7,10 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import { getAllOrders, getOrdersByCustomer } from "../database";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { getAllOrders, getOrdersByCustomer } from "../database";
+import { Feather } from '@expo/vector-icons'; // Make sure you have @expo/vector-icons installed
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -22,11 +23,9 @@ export default function OrdersScreen() {
     setLoading(true);
     try {
       if (route.params?.customerId) {
-        // Fetch only selected customer orders
         const data = await getOrdersByCustomer(route.params.customerId);
         setOrders(data);
       } else {
-        // Default: fetch all orders
         const data = await getAllOrders();
         setOrders(data);
       }
@@ -67,19 +66,18 @@ export default function OrdersScreen() {
     <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
       <View style={styles.container}>
         {/* Header */}
-       {/* Header */}
-<View style={styles.header}>
-  {route.params?.customerName ? (
-    <Text style={styles.headerText}>
-      <Text style={styles.grayText}>Customer: </Text>
-      <Text style={styles.blueText}>{route.params.customerName}</Text>
-    </Text>
-  ) : (
-    <Text style={[styles.headerText, styles.grayText]}>All Orders</Text>
-  )}
-</View>
+        <View style={styles.header}>
+          {route.params?.customerName ? (
+            <Text style={styles.headerText}>
+              <Text style={styles.grayText}>Customer: </Text>
+              <Text style={styles.blueText}>{route.params.customerName}</Text>
+            </Text>
+          ) : (
+            <Text style={[styles.headerText, styles.grayText]}>All Orders</Text>
+          )}
+        </View>
 
-
+        {/* Orders List */}
         <FlatList
           data={orders}
           keyExtractor={(item) => item.booking_id.toString()}
@@ -101,9 +99,7 @@ export default function OrdersScreen() {
                   {new Date(item.order_date).toLocaleDateString()}
                 </Text>
               </View>
-
               <Text style={styles.customer}>{item.customer_name}</Text>
-
               <View style={styles.infoRow}>
                 <Text style={styles.infoText}>Items: {item.item_count}</Text>
                 <Text style={styles.infoText}>
@@ -113,7 +109,27 @@ export default function OrdersScreen() {
             </TouchableOpacity>
           )}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 35 }}
         />
+      </View>
+
+      {/* Manual Bottom Tabs with Icons */}
+      <View style={styles.bottomTabs}>
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => navigation.navigate("MainTabs")}
+        >
+          <Feather name="home" size={22} color="gray" />
+          <Text style={styles.tabText}>Home</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.tab}
+          onPress={() => navigation.navigate("QRScan")}
+        >
+          <Feather name="camera" size={22} color="gray" />
+          <Text style={styles.tabText}>QR Scan</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -122,10 +138,10 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#f9fafb" },
   container: { flex: 1, backgroundColor: "#f7f8fa", padding: 10 },
- header: { marginBottom: 10 },
-headerText: { fontSize: 16, fontWeight: 500 },
-grayText: { color: "gray" }, 
-blueText: { color: "#007bff" }, 
+  header: { marginBottom: 10 },
+  headerText: { fontSize: 16, fontWeight: "500" },
+  grayText: { color: "gray" },
+  blueText: { color: "#007bff" },
   loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   emptyText: { fontSize: 16, color: "#888" },
@@ -142,6 +158,24 @@ blueText: { color: "#007bff" },
   customer: { marginTop: 5, fontSize: 15, color: "#007bff" },
   infoRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
   infoText: { fontSize: 14, color: "#555" },
+
+  bottomTabs: {
+    position: "absolute",
+    bottom: 26,
+    left: 0,
+    right: 0,
+    height: 70,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderTopWidth: 0.5,
+    borderTopColor: "#ccc",
+  },
+  tab: {
+    alignItems: "center",
+  },
+  tabText: { fontSize: 12, color: "gray", marginTop: 2 },
 });
 
 

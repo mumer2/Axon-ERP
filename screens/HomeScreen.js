@@ -11,9 +11,28 @@ import {
 import { ArrowUpRight, Scan, Eye, EyeOff } from "lucide-react-native";
 import OtherReports from "./OtherReports";
 import RecentActivitySection from "./RecentActivitySection";
+import { getTodaysSales, getLastMonthSales } from "../database";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function HomeScreen({ navigation }) {
   const [showBalance, setShowBalance] = useState(true);
+  const [todaySales, setTodaySales] = useState(0);
+const [lastMonthSales, setLastMonthSales] = useState(0);
+
+useFocusEffect(
+  React.useCallback(() => {
+    loadSales();
+  }, [])
+);
+
+const loadSales = async () => {
+  const today = await getTodaysSales();
+  const lastMonth = await getLastMonthSales();
+
+  setTodaySales(today);
+  setLastMonthSales(lastMonth);
+};
+
 
   const menu = [
     {
@@ -87,7 +106,7 @@ export default function HomeScreen({ navigation }) {
 
           {/* Balance Section */}
           <View style={styles.balanceContainer}>
-            <Text style={styles.baltitle}>BALANCE (Overall Sale)</Text>
+            <Text style={styles.baltitle}>Today BALANCE (Overall Sale)</Text>
 
             <TouchableOpacity
               style={styles.viewContainer}
@@ -100,16 +119,25 @@ export default function HomeScreen({ navigation }) {
               )}
             </TouchableOpacity>
 
-            <Text style={styles.amount}>
+            {/* <Text style={styles.amount}>
               {showBalance ? "$25,430.00" : "*****"}
-            </Text>
+            </Text> */}
+            <Text style={styles.amount}>
+  {showBalance ? `Rs ${todaySales.toFixed(2)}` : "*****"}
+</Text>
+
 
             <View style={styles.perfRow}>
               <View style={styles.arrowBox}>
                 <ArrowUpRight size={12} color="#fff" />
               </View>
-              <Text style={styles.avginc}>+200K</Text>
-              <Text style={styles.avgSale}> in last 1 mon</Text>
+              {/* <Text style={styles.avginc}>+200K</Text>
+              <Text style={styles.avgSale}> in last 1 mon</Text> */}
+              <Text style={styles.avginc}>
+  {showBalance ? `Rs ${lastMonthSales.toFixed(2)}` : "*****"}
+</Text>
+<Text style={styles.avgSale}> last month</Text>
+
             </View>
           </View>
         </ImageBackground>
@@ -224,9 +252,8 @@ const styles = StyleSheet.create({
     marginTop: -18,
   },
   viewContainer: {
-    left: 116,
-    top: 6,
-  },
+    left: 126,
+    },
 
   perfRow: {
     flexDirection: "row",

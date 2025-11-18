@@ -122,9 +122,9 @@ export default function OrderListScreen({ navigation, route }) {
 
         Alert.alert("Success", "Order submitted successfully!");
         // navigation.navigate("All Orders", { customerId });
-        // navigation.navigate("MainTabs", { screen: "HomeTab" });
+        navigation.navigate("MainTabs", { screen: "HomeTab" });
 
-        navigation.navigate("Home");
+        // navigation.navigate("Home");
 
       }
     } catch (error) {

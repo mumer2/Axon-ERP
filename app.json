@@ -22,7 +22,9 @@
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
       "config": {
         "googleMaps": {
@@ -30,14 +32,14 @@
         }
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.m_umer_m.axonerp"
+      "package": "com.m_umermalik.axonerp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-sqlite",
-       [
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow the app to use your location for live tracking."
@@ -46,7 +48,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "2540b639-2fb6-4b8c-8431-3e0a09a99bfc"
+        "projectId": "baba4100-6589-4286-baa3-8f7417449851"
       }
     }
   }
